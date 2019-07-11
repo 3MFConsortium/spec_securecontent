@@ -13,7 +13,7 @@
 
 
 
-| **Version** | 0.61 |
+| **Version** | 0.62 |
 | --- | --- |
 | **Status** | Draft |
 
@@ -212,17 +212,22 @@ Element **\<resourcedata>**
 | Name   | Type   | Use   | Default   | Annotation |
 | --- | --- | --- | --- | --- |
 | path | **ST\_Path** | required |  | Path to the encrypted resource file. |
+| compression | **ST\_Compression** |  | none | Compression algorithm applied to content before is encrypted. |
 | @anyAttribute | | | | |
 
 The \<resourcedata> element under a \<keystore> element contains the resource specific encryption information for an encrypted resource and the file path to the encrypted content file.
 
 **path** - Path to the encrypted file in the OPC package.
 
+**compression** - Compression algorithm applied before encryption the content to obtain a significant compression ratio.
+
+A producer MAY specify a compression “deflate” so the content is first compressed and then encrypted. When compression is "deflate", a consumer MUST first decrypt and then decompress the content.
+
 Example of a complete \<resourcedata> element for an encrypted resource that can be accessed by two different consumers:
 ```xml
-<resourcedata path=”path to encrypted file1 in package”>
+<resourcedata path=”path to encrypted file1 in package” compression="deflate">
   <encryptionmethod xenc:Algorithm="http://www.w3.org/2009/xmlenc11#aes256-gcm" />  
-  <accessright consumerindex=0>
+  <accessright consumerindex="0">
     <encryptedkey>
       <xenc:EncryptionMethod xenc:Algorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p" \>
       <xenc:CipherData>
@@ -230,7 +235,7 @@ Example of a complete \<resourcedata> element for an encrypted resource that can
       </xenc:CipherData>
     </encryptedkey>
   </accessright>
-  <accessright consumerindex=1>
+  <accessright consumerindex="1">
     <encryptedkey>
       <xenc:EncryptionMethod xenc:Algorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p" \>
       <xenc:CipherData>
@@ -240,8 +245,6 @@ Example of a complete \<resourcedata> element for an encrypted resource that can
   </accessright>
 </resourcedata>
 ```
-
-TO REVIEW: Do we need to specify the "xenc" namespace in Algorith and CipherValue? 
 
 ### 2.1.2.1 Encryption Method
 
@@ -367,7 +370,7 @@ See [the 3MF Core Specification glossary](https://github.com/3MFConsortium/spec_
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
-<xs:schema xmlns="http://schemas.microsoft.com/3dmanufacturing/securecontent/2019/04" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xenc="http://www.w3.org/2001/04/xmlenc#" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" targetNamespace="http://schemas.microsoft.com/3dmanufacturing/securecontent/2019/04" elementFormDefault="unqualified" attributeFormDefault="unqualified" blockDefault="#all">
+<xs:schema xmlns="http://schemas.hp.com/3dmanufacturing/securecontent/2019/04" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xenc="http://www.w3.org/2001/04/xmlenc#" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" targetNamespace="http://schemas.hp.com/3dmanufacturing/securecontent/2019/04" elementFormDefault="unqualified" attributeFormDefault="unqualified" blockDefault="#all">
   <xs:import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="http://www.w3.org/2001/xml.xsd"/>
   <xs:import namespace="http://www.w3.org/2001/04/xmlenc#" schemaLocation="https://www.w3.org/TR/xmlenc-core1/xenc-schema.xsd"/>
   <xs:import namespace='http://www.w3.org/2000/09/xmldsig#' schemaLocation='http://www.w3.org/TR/2002/REC-xmldsig-core-20020212/xmldsig-core-schema.xsd'/>
@@ -410,7 +413,7 @@ See [the 3MF Core Specification glossary](https://github.com/3MFConsortium/spec_
   </xs:complexType>
   <xs:complexType name="CT_Consumer">
     <xs:sequence>
-      <xs:element ref="ds:KeyInfo" minOccurs="0"/>
+      <xs:element ref="keyinfo" minOccurs="0"/>
        <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="2147483647"/>
     </xs:sequence>
     <xs:attribute name="consumerid" type="xs:string"/>
@@ -418,17 +421,17 @@ See [the 3MF Core Specification glossary](https://github.com/3MFConsortium/spec_
   </xs:complexType>
   <xs:complexType name="CT_ResourceData">
     <xs:sequence>
-      <xs:element ref="xenc:EncryptionMethod"/>
+      <xs:element ref="encryptionmethod"/>
       <xs:element ref="decryptright" minOccurs="0" maxOccurs="2147483647"/>
       <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="2147483647"/>
     </xs:sequence>
     <xs:attribute name="path" type="ST_Path" use="required"/>
+    <xs:attribute name="compression" type="ST_Compression" default="none"/>
     <xs:anyAttribute namespace="##other" processContents="lax"/>
   </xs:complexType>
   <xs:complexType name="CT_DecryptRight">
     <xs:sequence>
-      <xs:element ref="xenc:EncryptionMethod"/>
-      <xs:element ref="xenc:CipherData"/>
+      <xs:element ref="encryptedkey"/>
       <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="2147483647"/>
     </xs:sequence>
     <xs:attribute name="consumerindex" type="ST_ResourceIndex" use="required"/>
@@ -454,6 +457,12 @@ See [the 3MF Core Specification glossary](https://github.com/3MFConsortium/spec_
       <xs:enumeration value="obfuscated"/>
     </xs:restriction>
   </xs:simpleType>
+  <xs:simpleType name="ST_Compression">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="none"/>
+      <xs:enumeration value="deflate"/>
+    </xs:restriction>
+  </xs:simpleType>
   <!-- Elements -->
   <xs:element name="resources" type="CT_Resources"/>
   <xs:element name="object" type="CT_Object"/>
@@ -461,6 +470,9 @@ See [the 3MF Core Specification glossary](https://github.com/3MFConsortium/spec_
   <xs:element name="consumer" type="CT_Consumer"/>
   <xs:element name="resourcedata" type="CT_ResourceData"/>
   <xs:element name="decryptright" type="CT_DecryptRight"/>
+  <xs:element name="keyinfo" type="ds:KeyInfoType"/>
+  <xs:element name="encryptionmethod" type="xenc:EncryptionMethodType"/>
+  <xs:element name="encryptedkey" type="xenc:EncryptedKeyType"/>
 </xs:schema>
 ```
 
