@@ -13,7 +13,7 @@
 
 
 
-| **Version** | 0.62 |
+| **Version** | 0.72 |
 | --- | --- |
 | **Status** | Draft |
 
@@ -172,7 +172,7 @@ Element **\<consumer>**
 
 The \<consumer> element under a \<keystore> element contains the consumer specific information. When a \<keystore> element constains more than one consumer it means that there are more than a single recipient that could decrypt the content.
 
-**consumerid** - The consumer ID attribute to be referenced from the \<accessright> elements from a \<resourcedata> element to specify to which \<consumer> is intended the encrypted data encryption key.
+**consumerid** - The consumer ID attribute to be referenced from the \<decryptright> elements from a \<resourcedata> element to specify to which \<consumer> is intended the encrypted data encryption key.
 
 A consumer MUST be identified by "consumerid", an attribute in \<consumer> element,  where ConsumerId is a human readable unique identifier (Alphanumeric). Each consumer is expected to have a unique id, which is known to both a producer and consumer
 
@@ -227,22 +227,22 @@ Example of a complete \<resourcedata> element for an encrypted resource that can
 ```xml
 <resourcedata path=”path to encrypted file1 in package” compression="deflate">
   <encryptionmethod xenc:Algorithm="http://www.w3.org/2009/xmlenc11#aes256-gcm" />  
-  <accessright consumerindex="0">
+  <decryptright consumerindex="0">
     <encryptedkey>
       <xenc:EncryptionMethod xenc:Algorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p" \>
       <xenc:CipherData>
         <xenc:CipherValue><!-- base64(RSA2048_OAEP encrypted Data Encryption Key) --></xenc:CipherValue>
       </xenc:CipherData>
     </encryptedkey>
-  </accessright>
-  <accessright consumerindex="1">
+  </decryptright>
+  <decryptright consumerindex="1">
     <encryptedkey>
       <xenc:EncryptionMethod xenc:Algorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p" \>
       <xenc:CipherData>
         <xenc:CipherValue><!-- base64(RSA2048_OAEP encrypted Data Encryption Key) --></xenc:CipherValue>
       </xenc:CipherData>
     </encryptedkey>
-  </accessright>
+  </decryptright>
 </resourcedata>
 ```
 
@@ -283,7 +283,7 @@ The \<decryptright> element under a \<resourcedata> element contains the consume
 
 Element **\<encryptedkey>**
 
-The \<encryptedkey> element under the \<accessright> element contains the public key to decrypt the content file, but encrypted for a specific consumer, granting its decryption rights.
+The \<encryptedkey> element under the \<decryptright> element contains the public key to decrypt the content file, but encrypted for a specific consumer, granting its decryption rights.
 
 ##### Figure 2–3. xenc:EncryptedKeyType schema diagram
 
