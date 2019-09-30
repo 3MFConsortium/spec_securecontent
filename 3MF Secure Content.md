@@ -13,7 +13,7 @@
 
 
 
-| **Version** | 0.72 |
+| **Version** | 0.7 |
 | --- | --- |
 | **Status** | Draft |
 
