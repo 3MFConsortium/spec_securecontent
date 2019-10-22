@@ -13,7 +13,7 @@
 
 
 
-| **Version** | 0.7 |
+| **Version** | 0.8 |
 | --- | --- |
 | **Status** | Draft |
 
@@ -29,18 +29,18 @@
     + [1.1 Encryption scheme](#11-encryption-scheme)
     + [1.2 Model Relationships](#12-model-relationships)
     + [1.3 Package Organization and OPC Compliance](#13-package-organization-and-opc-compliance)
-    + [1.4 Secure Content Extension Additions Overview](#14-secure-content-extension-additions-overview)
-  * [Chapter 2. Resources](#chapter-2-resources)
-    + [2.1 Key Store](#21-key-store)
-      - [2.1.1 Consumer](#211-consumer)
-      - [2.1.2 Resource Data](#212-resource-data)
-  * [Chapter 3. Secure Content Resources](#chapter-3-secure-content-resources)
-    + [3.1 Object](#31-object)
-    + [3.2 OPC Relation Files](#32-opc-relation-files)
+  * [Chapter 2. Key Store](#2-key-store)
+      - [2.1 Consumer](#21-consumer)
+      - [2.2 Resource Data](#22-resource-data)
+  * [Chapter 3. OPC Relation and Content Types](#chapter-3-opc-relation-and-content-types)
+    + [3.1 Content Types](#31-content-types)
+    + [3.2 Relation Files](#32-relation-files)
 - [Part II. Appendixes](#part-ii-appendixes)
   * [Appendix A. Glossary](#appendix-a-glossary)
   * [Appendix B. 3MF XSD Schema](#appendix-b-3mf-xsd-schema)
-  * [Appendix C. Standard Namespace](#appendix-c-standard-namespace)
+  * [Appendix C. Standard Content Types and Relationships](#appendix-c-standard-content-types-and-relationships)
+    + [C.1 Content Types](#c1-content-types)
+    + [C.2 Relationships](#c2-relationships)
   * [Appendix D: Example file](#appendix-d-example-file)
 - [References](#references)
 
@@ -56,13 +56,11 @@ Part II, “Appendixes,” contains additional technical details and schemas too
 
 The information contained in this specification is subject to change. Every effort has been made to ensure its accuracy at the time of publication.
 
-This extension MUST be used only with Core specification 1.2.
+This extension MUST be used only with Core specification 1.x.
 
 ## Document Conventions
 
 See the [3MF Core Specification conventions](https://github.com/3MFConsortium/spec_core/blob/master/3MF%20Core%20Specification.md#document-conventions).
-
-In this extension specification, as an example, the prefix "po" maps to the xml-namespace "http://schemas.microsoft.com/3dmanufacturing/partoptimization/2019/04". See Appendix [C.3 Namespaces](#c3-namespaces).
 
 ## Language Notes
 
@@ -76,13 +74,17 @@ See the [3MF Core Specification software conformance](https://github.com/3MFCons
 
 # Chapter 1. Introduction
 
-This document describes new non-object resources, as well as attributes for securely encrypting resources within a particular 3MF package. If not explicitly stated otherwise, each of these resources is OPTIONAL for producers, but MUST be supported by consumers that specify support for the Secure Content Extension of 3MF.
+This document describes a new Open Packaging Conventions (OPC) root part for securely protecting resources within a particular 3MF package. If not explicitly stated otherwise, each of these resources is OPTIONAL for producers, but MUST be supported by consumers that specify support for the 3MF Secure Content Extension.
 
-In order to allow for the use of 3MF in high security printing environments, several additions are needed to efficiently support confidentiality of specific content in the 3MF package, providing a 3MF producer with the capability to control which consumers have access to the confidential content.
+This extension describes the encryption mechanism to protect the the 3MF content files (OPC parts), and it should be used in coordination with other 3MF extensions that refer to content stored in different OPC parts: models, textures, etc.
 
-A consumer not supporting the 3MF Secure Content Extension MUST be able to consume the 3MF with this extension. For this purpose,  3MF Secure Content Extension MUST contain alternative representation of confidential contents, e.g. low resolution information, bounding box, obfuscated model, etc.,  so the consumer could perform some basic tasks. For example, a consumer not supporting the current extension, should be able to render a low resolution preview or pack models in the build, without requiring access to secured content.
+In order to allow for the use of 3MF in highly secure printing environments, several additions are needed to efficiently support confidentiality of specific content in the 3MF package, providing a 3MF producer with the capability to control which consumers have access to the confidential content.
 
-In order to avoid data loss while parsing, a 3MF package which uses referenced objects MUST enlist the Secure Content Extension as “required extension”, as defined in the core specification. However if the Secure Content Extension is not enlisted a required, any consumer which does not supprt the Secure Content Extension will be able to access the alternative non-confidential representation of confidential models.
+A consumer not supporting the 3MF Secure Content Extension MAY be able to consume the 3MF with this extension. For this purpose, the 3MF Secure Content Extension MAY contain alternative representation of confidential contents (see 3MF Production Extension version 1.2???), e.g. low resolution information, bounding box, obfuscated model, etc., so the consumer could perform some basic tasks. For example, a consumer not supporting the current extension, should be able to render a low resolution preview or pack models in the build, without requiring access to secured content.
+
+In order to avoid data loss while parsing, a 3MF package which uses referenced objects MUST enlist the Secure Content Extension as “required extension”, as defined in the core specification. However if the Secure Content Extension is not enlisted as required, any consumer which does not support the Secure Content Extension will be able to access the alternative non-confidential representation of confidential models.
+
+A consumer that is authorized to un-protect content by reversing the above steps MUST NOT re-save the content or enable the user to save the content in an unprotected fashion (regardless of file format) without the approval (written or programmatic) of the protection authority (which might or might not be the producer).
 
 ## 1.1 Encryption scheme
 
@@ -96,74 +98,56 @@ The encryption model used is a 'two-level' Key Encryption Key - Data Encryption 
 
 The KEK-DEK model provides efficiency because the (probably large) data in a confidential resource is encrypted/decrypted only once using an efficient symmetric encryption algorithm and KEK approach provides flexibility in controlling who can access the confidential data, by allowing encrypting the DEK with different KEKs.
 
-## 1.2 Model Relationships
+## 1.2 Parts Relationships
 
-The primary emphasis of this extension is the possibility to encrypt store model data in files (or other resources) separate from the root model file. This structural approach enables three primary advantages for producers and consumers of 3MF packages with large numbers of individual models:
+The primary emphasis of this extension is the possibility to protect OPC parts separated from the root model file. This structural approach enables two primary advantages for producers and consumers of 3MF packages with large numbers of individual models:
 
 - The build directive in the root model file can be parsed by consumers without having to parse any encrypted file.
-- Packing of a build by a job submitting application could be performed without the need to access to confidential encrypted content.
-- Having a Key Store in a separate file allows to be shared between the root model and any encrypted model file. (HB: ?)
+- Key Store in a separate file to be able to link to any content file, except the root model part.
 
-The root model part MAY have relationships to other model parts, whose object resources can be referenced by the parent model stream indirectly from the Key Store.
+When used in conjunction with the 3MF Production extension version 1.2 or above, the root model part MAY have relationships to other model parts whose resources can be referenced by the parent model stream by their file path. When any of those file paths is found in the keystore, it is identified as an encrypted OPC part.
 
-An encrypted model [includes?] by reference other resources through a Key Store, which is defined in the encrypted model and might be in an external file, either shared with the root model or on a separated one. [HB: ??]
+Other content files defined in other 3MF extensions might be also encrypted, when identified by their file paths in the keystore. For example, color textures as defined in the 3MF materials and properties extension, etc.
 
-As defined in the core 3MF spec, only the build section of the root model file contains valid build information. Other model streams SHOULD contain empty build sections. Every consumer MUST ignore the build section entries of all referenced child model files.
-
-These limitations ensure there existence of ONLY a single level of "depth" to multi-file model relationships within a package and explicitly prevent complex or circular object references.
-
+Only non-root OPC parts MAY be encrypted. Root OPC parts and parts relationships MUST not be encrypted to be compliant with OPC.
 
 ## 1.3 Package Organization and OPC Compliance
 
 A new 3MF resource, the KeyStore, is defined to support content encryption. The KeyStore stores the encryption information for the different confidential resources in the package.
+
 For each confidential resource, the KeyStore contains:
 
-- Information on how the content is encrypted: the Data Encryption Method, and other information relevant to enable content decryption. For the only currently supported Data Encryption Method, the additional information is the initialization vector (IV) and tag required for decryption in the AES256 GCM Method. [HB: what about PADDING?]
+- Information on how the content is encrypted: the Data Encryption Method, and other information relevant to enable content decryption. For the only currently supported Data Encryption Method, the additional information is the initialization vector (IV) and tag required for decryption in the AES256 GCM Method.
 
-- The DEK encrypted using one or several KEKs, with the corresponding information about the Key Encryption Method used. In the case of the currently supported Key Encryption Method: RSA2048 OAEP, there will be a different key entry for each one of the consumers authorized to access confidential content.
+- One DEK encrypted using a KEKs, with the corresponding information about the Key Encryption Method used, for each one of the consumers authorized to access confidential content. Currently it is supported only one Key Encryption Method: RSA2048 OAEP.
 
 ##### Figure 1–1. A typical 3MF Secure Content Document with multiple encrypted model streams
 ![OPC organization](images/1.1.opc_organization.png)
 
-## 1.4 Secure Content Extension Additions Overview
-
-There are additions to the 3MF core specification in the 3MF Secure Content Extension.  Each will be detailed by where it fits into the existing core 3MF constructs.  
-
-##### Figure 1-2: Overview of 3MF Secure Content Extension XML structure
-
-![OPC organization](images/1.2.xsd_overview.png)
-
-# Chapter 2. Resources
-
-Element \<resources>
-
-![Resources](images/2.resources.png)
-
-The \<keystore> element encapsulates encryption key data and references to the encrypted content.  The Key Stores are referenced from other resources in order to point to the encrypted content.  [HB: which resources need reference Key Store?]
-
-## 2.1 Key Store
+# Chapter 2. Key Store
 
 Element **\<keystore>**
 
-![Key Store XML structure](images/2.1.keystore.png)
+![Key Store XML structure](images/2.keystore.png)
 
 | Name   | Type   | Use   | Default   | Annotation |
 | --- | --- | --- | --- | --- |
-| id | **ST\_ResourceID** | required |   | ResourceID of this key store resource. |
-| path | **ST\_UriReference** |  |   | Path to the key store file. |
+| uuid | **ST\_UUID** | required |   | A universally unique ID that allows the Key Store to be identified. |
 | @anyAttribute | | | | |
+
+The Key Store part consists of a \<keystore> element that encapsulates encryption key data and references to the encrypted content. 
 
 The \<keystore> element contains a set of \<consumer> elements and \<resourcedata> elements. Each \<consumer> element contains the information to identify a consumer key and each \<resourcedata> references the encrypted content and includes the information to be able to decrypt it, such as the encryption algorithm used and the data encryption key, encrypted with the key encryption key of each consumer.
 
-**id** - The KeyStore resource id to be referenced by the attribute "keystoreid" in any resource to be encrypted.
+**uuid** - The KeyStore universal unique ID that allows the Key Store to be idetified over time and across physical and across applications and printers.
 
-**path** - The Key Store might contain an optional “path” attribute so a \<keystore> element MIGHT be stored in a separated file in the OPC package. When a \<keystore> element is stored in a separated file, the "path" attribute in the referencing \<keystore> in the root model references the file location inside the OPC package, and it MUST NOT contain any \<consumer> and \<resourcedata> elements. Then the referenced \<keystore> element in a separeted file MUST NOT contain any "path" attribute to avoid endless referencing.
+When an editor modifies the Key Store, it MUST produce a new uuid to univocally identify the new keystore content.
 
-### 2.1.1 Consumer
+### 2.1 Consumer
 
 Element **\<consumer>**
 
-![Comsumer XML structure](images/2.1.1.consumer.png)
+![Comsumer XML structure](images/2.1.consumer.png)
 
 | Name   | Type   | Use   | Default   | Annotation |
 | --- | --- | --- | --- | --- |
@@ -181,7 +165,7 @@ A consumer MUST be identified by "consumerid", an attribute in \<consumer> eleme
 <consumer id=’HP#MOP44B#SG1632635’>
 ```
 
-#### 2.1.1.1 Key Info
+#### 2.1.1 Key Info
 
 Element **\<keyinfo>**
 
@@ -189,7 +173,7 @@ It is possible that a consumer has different encrypttion key pairs. In this case
 
 ##### Figure 2–1. ds:KeyInfoType schema diagram
 
-![KeyInfoType schema design](images/2.1.1.1.ds-keyinfo.png)
+![KeyInfoType schema design](images/2.1.ds-keyinfo.png)
 
 For the purposes of this specification, only the \<ds:KeyValue> element is supported for identifying the customer key. Consumers may disregard any pther element if present.
 
@@ -203,11 +187,11 @@ See the following example:
 </consumer>
 ```
 
-### 2.1.2 Resource Data
+### 2.2 Resource Data
 
 Element **\<resourcedata>**
 
-![Resource Data XML structure](images/2.1.2.resourcedata.png)
+![Resource Data XML structure](images/2.2.resourcedata.png)
 
 | Name   | Type   | Use   | Default   | Annotation |
 | --- | --- | --- | --- | --- |
@@ -217,7 +201,7 @@ Element **\<resourcedata>**
 
 The \<resourcedata> element under a \<keystore> element contains the resource specific encryption information for an encrypted resource and the file path to the encrypted content file.
 
-**path** - Path to the encrypted file in the OPC package.
+**path** - Path to the encrypted file in the OPC package. The path MUST be treated as a hash map to identify encrypted files referenced from any XML model file by their path attribute defined in 3MF extensions. When a model resource path is found in a \<resourcedata> element, the content of that file MUST be encrypted.
 
 **compression** - Compression algorithm applied before encryption the content to obtain a significant compression ratio.
 
@@ -246,7 +230,7 @@ Example of a complete \<resourcedata> element for an encrypted resource that can
 </resourcedata>
 ```
 
-### 2.1.2.1 Encryption Method
+### 2.2.1 Encryption Method
 
 Element **\<encryptionmethod>**
 
@@ -254,21 +238,21 @@ The \<encryptionmethod> element under the \<resourcedata> element contains the i
 
 ##### Figure 2–2. xenc:EncryptionMethodType schema diagram
 
-![Encryption Method schema design](images/2.1.2.1.xenc-encryptionmethod.png)
+![Encryption Method schema design](images/2.2.1.xenc-encryptionmethod.png)
 
 For this specification, the only algorithm supported for data encryption is AES256-GCM, identified with the URI http://www.w3.org/2009/xmlenc11#aes256-gcm:
 
 > AES-GCM [SP800-38D] is an authenticated encryption mechanism. It is equivalent to doing these two operations in one step - AES encryption followed by HMAC signing.
 
-> For the purposes of this specification, AES-GCM shall be used with a 96 bit Initialization Vector (IV) and a 128 bit Authentication Tag (T). The cipher text contains the IV first, followed by the encrypted octets and finally the Authentication tag. No padding should be used during encryption. During decryption the implementation should compare the authentication tag computed during decryption with the specified Authentication Tag, and fail if they don't match. For details on the implementation of AES-GCM, see [SP800-38D].
+> For the purposes of this specification, A-ES-GCM shall be used with a 96 bit Initialization Vector (IV) and a 128 bit Authentication Tag (T). The cipher text contains the IV first, followed by the encrypted octets and finally the Authentication tag. No padding should be used during encryption. During decryption the implementation should compare the authentication tag computed during decryption with the specified Authentication Tag, and fail if they don't match. For details on the implementation of AES-GCM, see [SP800-38D].
 
 All other elements in the \<encryptionmethod> definition are ignored in this specification. Consumers may disregard these elements if present.
 
-#### 2.1.2.2 Decrypt Right
+#### 2.2.2 Decrypt Right
 
 Element **\<decryptright>**
 
-![Access Right XML structure](images/2.1.2.1.decryptright.png)
+![Access Right XML structure](images/2.2.1.decryptright.png)
 
 | Name   | Type   | Use   | Default   | Annotation |
 | --- | --- | --- | --- | --- |
@@ -279,7 +263,7 @@ The \<decryptright> element under a \<resourcedata> element contains the consume
 
 **consumerindex** - Index to the \<consumer> element in the Key Store to select the Customer to which the decryption key is targeted.
 
-#### 2.1.2.2.1 Encrypted key
+#### 2.2.2.1 Encrypted key
 
 Element **\<encryptedkey>**
 
@@ -287,7 +271,7 @@ The \<encryptedkey> element under the \<decryptright> element contains the publi
 
 ##### Figure 2–3. xenc:EncryptedKeyType schema diagram
 
-![Encrypted Key schema design](images/2.1.2.2.1.xenc-encryptedkey.png)
+![Encrypted Key schema design](images/2.2.2.1.xenc-encryptedkey.png)
 
  For this specification, the only elements \<xenc:EncryptedKey> and \<xenc:CipherData> are supported.
 
@@ -305,60 +289,49 @@ The \<xenc:CipherData> element contains the encrypted key payload for a specific
 
 ##### Figure 2–4. xenc:CipherDataType schema diagram
 
-![Cipher Data schema design](images/2.1.2.2.1.xenc-cipherdata.png)
+![Cipher Data schema design](images/2.2.2.1.xenc-cipherdata.png)
 
 For the purposes of this specification only the \<xenc:CipherValue> element is supported. Consumers may disregard any other element if present.
 
-# Chapter 3. Secure Content Resources
+# Chapter 3. OPC Relation and Content Types
 
-This chapter describes the resources that are protected by encryption.
+The Key Store in a 3MF document is identified by a new content type and a new relationship.
 
-## 3.1 Object
+## 3.1 Content Types
 
-Element **\<object>**
+The Key Store MUST be defined in the OPC ContentTypes part by overriding the default XML definition.
 
-![Object additions to XML structure](images/3.1.object.png)
+```xml
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+    <Default ContentType="application/vnd.openxmlformats-package.relationships+xml" Extension="rels"/>
+    <Override ContentType="application/vnd.ms-package.3dmanufacturing-3dmodel+xml" PartName="/3D/3Dmodel.moodel"/>
+    <Override ContentType="application/vnd.ms-package.3dmanufacturing-keystore+xml" PartName="/Secure/keystore.xml"/>
+    <Default ContentType="image/png" Extension="png"/>
+</Types>
+```
 
-| Name   | Type   | Use   | Default   | Annotation |
-| --- | --- | --- | --- | --- |
-| keystoreid | **ST\_ResourceID** |  |  | ResourceID of the store resource with the keys to the encrypted content. |
-| resourcedataindex | **ST\_ResourceIndex** |  |   | Zero-based index to the resource data entry with the keys to the encrypted content. |
-| meshresolution | **ST\_MeshResolution** |  | fullres  | Indicates the intended use the mesh model when the content is protected by Secure Content. |
-| @anyAttribute | | | | |
+## 3.2 Relation Files
 
-The \<object> element in the 3MF core specification ([Chapter 4. Object Resources](https://github.com/3MFConsortium/spec_core/blob/master/3MF%20Core%20Specification.md#chapter-4-object-resources)) is extended with parts encryption to protect it's content.
+The Key Store file MUST always be referenced in the root .rels file in order to conform with OPC standards.
 
-**keystoreid** - Reference to the \<keystore> elements in \<resources> to select the Key Store containing the encryption information and keys.
+The Key Store file SHOULD be specified as a MustPreserve relationship type, in order that editors that do not support this extension are still instructed to save it back when modifying the 3MF.
 
-**resourcedataindex** - Zero-based index to the \<resourcedata> element in the Key Store containing the access right by consumer and the path to the encrypted content.
+Example root .rels file:
 
-**meshresolution** - An enumerated description of the mesh that is included in the \<object>. "meshresolution" gives consumers a hint about how the mesh data in the \<object> is intended to be used when DRM is present. Valid options are:
-* "fullres": The included mesh data is "full resolution" and could be used to re-generate the slices contained in the 3MF package. The option "fullres" MUST NOT be used when the object is protected by DRM.
-* "lowres": The included mesh is not sufficiently accurate to re-generate the model contained in the object.
-* "obfuscated" when partial obfuscation techniques are applied, the model here encapsulates the original model, but had extra material added to cover some confidential surfaces/dimensions.
-
-## 3.2 OPC Relation Files
-
-All model files in the 3MF package MUST be referenced in .rels files in order to conform with OPC standards. The root model file MUST always be referenced in the root .rels file. Example root .rels file:
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
     <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
     <Relationship Type="http://schemas.microsoft.com/3dmanufacturing/2013/01/3dmodel" Target="/3D/build.model" Id="rel0" />
     <Relationship Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/thumbnail" Target="/Metadata/thumbnail.png" Id="rel4" />
+   <Relationship Type="http://schemas.microsoft.com/3dmanufacturing/2019/04/keystore" Target="/Secure/keystore.xml" Id="rel10" />
+   <Relationship Type="http://schemas.openxmlformats.org/package/2006/relationships/mustpreserve" Target="/Secure/keystore.xml" Id="rel11" />
 </Relationships>
 ```
 
-Any subsequente file after the root model file MUST not be referenced from the root .rels file. Referenced model files MUST be included in the .rels file from the referencing model file according to the part relationship defined in OPC. For example, assuming that the root model file in the /3D folder is named model.model, the non-root model file references MUST be in the /3D/\_rels/model.model.rels file:
+[NOTE: for MustPreserve do we have to add a second entry for the same file??? Two relationships for same file allowed???]
 
-```xml
-<?xml version="1.0" encoding="utf-8"?>
-    <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
-    <Relationship Type="http://schemas.microsoft.com/3dmanufacturing/2019/04/keystore" Target="/3D/secure/keystore.xml" Id="rel1" />
-    <Relationship Type="http://schemas.microsoft.com/3dmanufacturing/2019/04/encrypted3dmodel" Target="/3D/secure/object1.model.aes" Id="rel11" />
-    <Relationship Type="http://schemas.microsoft.com/3dmanufacturing/2019/04/encrypted3dmodel" Target="/3D/secure/object2.model.aes" Id="rel12" />
-    <Relationship Type="http://schemas.microsoft.com/3dmanufacturing/2019/04/encrypted3dmodel" Target="/3D/secure/object3.model.aes" Id="rel13" />
-</Relationships>
-```
+[NOTE: Does MustPreserve prevent from an editor modifying the keystore??? For example adding more entries.]
 
 # Part II. Appendixes
 
@@ -386,29 +359,13 @@ See [the 3MF Core Specification glossary](https://github.com/3MFConsortium/spec_
   ]]></xs:documentation>
   </xs:annotation>
   <!-- Complex Types -->
-  <xs:complexType name="CT_Resources">
-    <xs:sequence>
-      <xs:choice minOccurs="0" maxOccurs="2147483647">
-        <xs:element ref="keystore" minOccurs="0" maxOccurs="2147483647"/>
-        <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="2147483647"/>
-      </xs:choice>
-    </xs:sequence>
-    <xs:anyAttribute namespace="##other" processContents="lax"/>
-  </xs:complexType>
-  <xs:complexType name="CT_Object">
-    <xs:attribute name="keystoreid" type="ST_ResourceID"/>
-    <xs:attribute name="resourcedataindex" type="ST_ResourceIndex"/>
-    <xs:attribute name="meshresolution" type="ST_MeshResolution" default="fullres"/>
-    <xs:anyAttribute namespace="##other" processContents="lax"/>
-  </xs:complexType>
   <xs:complexType name="CT_KeyStore">
     <xs:sequence>
       <xs:element ref="consumer" minOccurs="0" maxOccurs="2147483647"/>
       <xs:element ref="resourcedata" minOccurs="0" maxOccurs="2147483647"/>
       <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="2147483647"/>
     </xs:sequence>
-    <xs:attribute name="id" type="ST_ResourceID" use="required"/>
-    <xs:attribute name="path" type="ST_Path"/>
+    <xs:attribute name="UUID" type="ST_UUID" use="required"/>
     <xs:anyAttribute namespace="##other" processContents="lax"/>
   </xs:complexType>
   <xs:complexType name="CT_Consumer">
@@ -463,9 +420,12 @@ See [the 3MF Core Specification glossary](https://github.com/3MFConsortium/spec_
       <xs:enumeration value="deflate"/>
     </xs:restriction>
   </xs:simpleType>
+  <xs:simpleType name="ST_UUID">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
   <!-- Elements -->
-  <xs:element name="resources" type="CT_Resources"/>
-  <xs:element name="object" type="CT_Object"/>
   <xs:element name="keystore" type="CT_KeyStore"/>
   <xs:element name="consumer" type="CT_Consumer"/>
   <xs:element name="resourcedata" type="CT_ResourceData"/>
@@ -476,11 +436,15 @@ See [the 3MF Core Specification glossary](https://github.com/3MFConsortium/spec_
 </xs:schema>
 ```
 
-# Appendix C. Standard Namespace
+# Appendix C. Standard Content Types and Relationships
 
-| | |
-| --- | --- |
-|Secure Content | [http://schemas.microsoft.com/3dmanufacturing/securecontent/2019/04](http://schemas.microsoft.com/3dmanufacturing/securecontent/2019/04) |
+## C.1 Content Types
+
+Secure Content application/vnd.ms-package.3dmanufacturing-keystore+xml
+
+## C.2 Relationships
+
+Secure Content [http://schemas.microsoft.com/3dmanufacturing/securecontent/2019/04](http://schemas.microsoft.com/3dmanufacturing/securecontent/2019/04)
 
 # Appendix D: Example file
 
@@ -499,32 +463,6 @@ Specification for encrypting data and representing the result in XML. https://ww
 
 Specification for XML digital signature processing rules and syntax. http://www.w3.org/TR/xmldsig-core1/.
 
-**BNF of Generic URI Syntax**
+For additional references see the [3MF Core Specification references](https://github.com/3MFConsortium/spec_core/blob/1.2.3/3MF%20Core%20Specification.md#references).
 
-"BNF of Generic URI Syntax." World Wide Web Consortium. http://www.w3.org/Addressing/URL/5\_URI\_BNF.html
-
-**Open Packaging Conventions**
-
-Ecma International. "Office Open XML Part 2: Open Packaging Conventions." 2006. http://www.ecma-international.org
-
-**Unicode**
-
-The Unicode Consortium. The Unicode Standard, Version 4.0.0, defined by: _The Unicode Standard, Version 4.0_. Boston, MA: Addison-Wesley, 2003.
-
-**XML**
-
-Bray, Tim, Eve Maler, Jean Paoli, C. M. Sperlberg-McQueen, and François Yergeau (editors). "Extensible Markup Language (XML) 1.0 (Fourth Edition)." World Wide Web Consortium. 2006. http://www.w3.org/TR/2006/REC-xml-20060816/
-
-**XML C14N**
-
-Boyer, John. "Canonical XML Version 1.0." World Wide Web Consortium. 2001. http://www.w3.org/TR/xml-c14n.
-
-**XML Namespaces**
-
-Bray, Tim, Dave Hollander, Andrew Layman, and Richard Tobin (editors). "Namespaces in XML 1.0 (Second Edition)." World Wide Web Consortium. 2006. http://www.w3.org/TR/2006/REC-xml-names-20060816/
-
-**XML Schema**
-
-Beech, David, Murray Maloney, Noah Mendelsohn, and Henry S. Thompson (editors). "XML Schema Part 1: Structures," Second Edition. World Wide Web Consortium. 2004. http://www.w3.org/TR/2004/REC-xmlschema-1-20041028/
-
-Biron, Paul V. and Ashok Malhotra (editors). "XML Schema Part 2: Datatypes," Second Edition. World Wide Web Consortium. 2004. http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/
+Copyright 3MF Consortium 2019.
