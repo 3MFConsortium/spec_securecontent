@@ -407,13 +407,6 @@ See the [3MF Core Specification glossary](https://github.com/3MFConsortium/spec_
       <xs:maxExclusive value="2147483648"/>
     </xs:restriction>
   </xs:simpleType>
-  <xs:simpleType name="ST_MeshResolution">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="fullres"/>
-      <xs:enumeration value="lowres"/>
-      <xs:enumeration value="obfuscated"/>
-    </xs:restriction>
-  </xs:simpleType>
   <xs:simpleType name="ST_Compression">
     <xs:restriction base="xs:string">
       <xs:enumeration value="none"/>
