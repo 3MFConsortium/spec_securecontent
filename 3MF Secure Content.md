@@ -60,15 +60,15 @@ This extension MUST be used only with Core specification 1.x.
 
 ## Document Conventions
 
-See the [3MF Core Specification conventions](https://github.com/3MFConsortium/spec_core/blob/master/3MF%20Core%20Specification.md#document-conventions).
+See [the 3MF Core Specification conventions](https://github.com/3MFConsortium/spec_core/blob/master/3MF%20Core%20Specification.md#document-conventions).
 
 ## Language Notes
 
-See the [3MF Core Specification language notes](https://github.com/3MFConsortium/spec_core/blob/master/3MF%20Core%20Specification.md#language-notes).
+See [the 3MF Core Specification language notes](https://github.com/3MFConsortium/spec_core/blob/master/3MF%20Core%20Specification.md#language-notes).
 
 ## Software Conformance
 
-See the [3MF Core Specification software conformance](https://github.com/3MFConsortium/spec_core/blob/master/3MF%20Core%20Specification.md#software-conformance).
+See [the 3MF Core Specification software conformance](https://github.com/3MFConsortium/spec_core/blob/master/3MF%20Core%20Specification.md#software-conformance).
 
 # Part I: 3MF Documents
 
@@ -80,7 +80,7 @@ This extension describes the encryption mechanism to protect the the 3MF content
 
 In order to allow for the use of 3MF in highly secure printing environments, several additions are needed to efficiently support confidentiality of specific content in the 3MF package, providing a 3MF producer with the capability to control which consumers have access to the confidential content.
 
-A consumer not supporting the 3MF Secure Content Extension MAY be able to consume the 3MF with this extension. For this purpose, the 3MF Secure Content Extension MAY contain alternative representation of confidential contents (see the [3MF Production Extension](https://github.com/3MFConsortium/spec_production/blob/1.2-update/3MF%20Production%20Extension.md), e.g. low resolution information, bounding box, obfuscated model, etc., so the consumer could perform some basic tasks. For example, a consumer not supporting the current extension, should be able to render a low resolution preview or pack models in the build, without requiring access to secured content.
+A consumer not supporting the 3MF Secure Content Extension MAY be able to consume the 3MF with this extension. For this purpose, the 3MF Secure Content Extension MAY contain alternative representation of confidential contents (See [the 3MF Production Extension](https://github.com/3MFConsortium/spec_production/blob/1.2-update/3MF%20Production%20Extension.md), e.g. low resolution information, bounding box, obfuscated model, etc., so the consumer could perform some basic tasks. For example, a consumer not supporting the current extension, should be able to render a low resolution preview or pack models in the build, without requiring access to secured content.
 
 In order to avoid data loss while parsing, a 3MF package which uses referenced objects MUST enlist the Secure Content Extension as “required extension”, as defined in the core specification. However if the Secure Content Extension is not enlisted as required, any consumer which does not support the Secure Content Extension will be able to access the alternative non-confidential representation of confidential models.
 
@@ -143,7 +143,9 @@ The \<keystore> element contains a set of \<consumer> elements and \<resourcedat
 
 When an editor modifies the Key Store, it MUST produce a new uuid to univocally identify the new keystore content.
 
-### 2.1 Consumer
+>**Note:** "Unique identifier" MUST be any of the four UUID variants described in IETF RFC 4122, which includes Microsoft GUIDs as well as time-based UUIDs.
+
+## 2.1 Consumer
 
 Element **\<consumer>**
 
@@ -165,7 +167,7 @@ A consumer MUST be identified by "consumerid", an attribute in \<consumer> eleme
 <consumer id=’HP#MOP44B#SG1632635’>
 ```
 
-#### 2.1.1 Key Info
+### 2.1.1 Key Info
 
 Element **\<keyinfo>**
 
@@ -187,7 +189,7 @@ See the following example:
 </consumer>
 ```
 
-### 2.2 Resource Data
+## 2.2 Resource Data
 
 Element **\<resourcedata>**
 
@@ -201,7 +203,9 @@ Element **\<resourcedata>**
 
 The \<resourcedata> element under a \<keystore> element contains the resource specific encryption information for an encrypted resource and the file path to the encrypted content file.
 
-**path** - Path to the encrypted file in the OPC package. The path MUST be treated as a hash map to identify encrypted files referenced from any XML model file by their path attribute defined in 3MF extensions. When a model resource path is found in a \<resourcedata> element, the content of that file MUST be encrypted.
+**path** - Path to the encrypted file in the OPC package. The path MUST be treated as a hash map to identify encrypted files referenced from any XML model file by their path attribute defined in 3MF extensions. A given file path must be unique; it MUST NOT show up in more than one \<resourcedata> element.
+
+When a model resource path is found in a \<resourcedata> element, the content of that file MUST be encrypted.
 
 **compression** - Compression algorithm applied before encryption the content to obtain a significant compression ratio.
 
@@ -248,7 +252,7 @@ For this specification, the only algorithm supported for data encryption is AES2
 
 All other elements in the \<encryptionmethod> definition are ignored in this specification. Consumers may disregard these elements if present.
 
-#### 2.2.2 Decrypt Right
+### 2.2.2 Decrypt Right
 
 Element **\<decryptright>**
 
@@ -317,7 +321,7 @@ The Key Store file MUST always be referenced in the root .rels file in order to 
 
 The Key Store file SHOULD be specified as a MustPreserve relationship type, in order that editors that do not support this extension are still instructed to save it back when modifying the 3MF.
 
-Example root .rels file:
+Example root .rels file, where the keystore part is referenced twice: one the KeyStore relationship type and a second for the MustPreserve relationship type.
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -329,15 +333,11 @@ Example root .rels file:
 </Relationships>
 ```
 
-[NOTE: for MustPreserve do we have to add a second entry for the same file??? Two relationships for same file allowed???]
-
-[NOTE: Does MustPreserve prevent from an editor modifying the keystore??? For example adding more entries.]
-
 # Part II. Appendixes
 
 ## Appendix A. Glossary
 
-See the [3MF Core Specification glossary](https://github.com/3MFConsortium/spec_core/blob/master/3MF%20Core%20Specification.md#appendix-a-glossary).
+See [the 3MF Core Specification glossary](https://github.com/3MFConsortium/spec_core/blob/master/3MF%20Core%20Specification.md#appendix-a-glossary).
 
 ## Appendix B. 3MF XSD Schema
 
@@ -437,7 +437,7 @@ Secure Content application/vnd.ms-package.3dmanufacturing-keystore+xml
 
 ## C.2 Relationships
 
-Secure Content [http://schemas.microsoft.com/3dmanufacturing/securecontent/2019/04](http://schemas.microsoft.com/3dmanufacturing/securecontent/2019/04)
+Secure Content [http://schemas.microsoft.com/3dmanufacturing/2019/04/keystore](http://schemas.microsoft.com/3dmanufacturing/2019/04/keystore)
 
 # Appendix D: Example file
 
@@ -456,6 +456,6 @@ Specification for encrypting data and representing the result in XML. https://ww
 
 Specification for XML digital signature processing rules and syntax. http://www.w3.org/TR/xmldsig-core1/.
 
-For additional references see the [3MF Core Specification references](https://github.com/3MFConsortium/spec_core/blob/1.2.3/3MF%20Core%20Specification.md#references).
+For additional references See [the 3MF Core Specification references](https://github.com/3MFConsortium/spec_core/blob/1.2.3/3MF%20Core%20Specification.md#references).
 
 Copyright 3MF Consortium 2019.
