@@ -74,15 +74,15 @@ See [the 3MF Core Specification software conformance](https://github.com/3MFCons
 
 # Chapter 1. Introduction
 
-This document describes a new Open Packaging Conventions (OPC) root part for securely protecting resources within a particular 3MF package. If not explicitly stated otherwise, each of these resources is OPTIONAL for producers, but MUST be supported by consumers that specify support for the 3MF Secure Content Extension.
+This document describes a new Open Packaging Conventions (OPC) root part for securely protecting resources within a 3MF package. If not explicitly stated otherwise, each of these resources is OPTIONAL for producers, but MUST be supported by consumers that specify support for the 3MF Secure Content Extension.
 
 This extension describes the encryption mechanism to protect the the 3MF content files (OPC parts), and it should be used in coordination with other 3MF extensions that refer to content stored in different OPC parts: models, textures, etc.
 
 In order to allow for the use of 3MF in highly secure printing environments, several additions are needed to efficiently support confidentiality of specific content in the 3MF package, providing a 3MF producer with the capability to control which consumers have access to the confidential content.
 
-A consumer not supporting the 3MF Secure Content Extension MAY be able to consume the 3MF with this extension. For this purpose, the 3MF Secure Content Extension MAY contain alternative representation of confidential contents (See [the 3MF Production Extension](https://github.com/3MFConsortium/spec_production/blob/1.2-update/3MF%20Production%20Extension.md), e.g. low resolution information, bounding box, obfuscated model, etc., so the consumer could perform some basic tasks. For example, a consumer not supporting the current extension, should be able to render a low resolution preview or pack models in the build, without requiring access to secured content.
+A consumer not supporting the 3MF Secure Content Extension MAY be able to consume the 3MF with this extension. For this purpose, the 3MF Secure Content Extension MAY contain alternative representation of confidential contents (See [the 3MF Production Extension](https://github.com/3MFConsortium/spec_production/blob/1.2-update/3MF%20Production%20Extension.md), e.g. low-resolution information, bounding box, obfuscated model, etc., so the consumer could perform some basic tasks. For example, a consumer not supporting the current extension, should be able to render a low resolution preview or pack models in the build, without requiring access to secured content.
 
-In order to avoid data loss while parsing, a 3MF package which uses referenced objects MUST enlist the Secure Content Extension as “required extension”, as defined in the core specification. However if the Secure Content Extension is not enlisted as required, any consumer which does not support the Secure Content Extension will be able to access the alternative non-confidential representation of confidential models.
+In order to avoid data loss while parsing, a 3MF package which uses referenced objects MUST enlist the Secure Content Extension as “required extension”, as defined in the core specification. However, if the Secure Content Extension is not enlisted as required, any consumer which does not support the Secure Content Extension will be able to access the alternative non-confidential representation of confidential models.
 
 A consumer that is authorized to un-protect content by reversing the above steps MUST NOT re-save the content or enable the user to save the content in an unprotected fashion (regardless of file format) without the approval (written or programmatic) of the protection authority (which might or might not be the producer).
 
@@ -94,7 +94,7 @@ The encryption model used is a 'two-level' Key Encryption Key - Data Encryption 
 
 - The DEK for each one of the confidential resources is encrypted with one or several Key Encryption Keys (KEK), using Key Encryption Methods that ensure that only the intended consumers can decrypt and use the DEK. This means that the consumers must have an RSA2048 asymmetric private decryption key, and the corresponding public key must be made available to the producer to encrypt the DEK. In this proposal, the only Key Encryption Method supported is asymmetric RSA2048 OAEP. In the future, other Key Encryption Methods may be supported.
 
--	There could be several consumers for the same 3MF file and at the same time some consumers might have more than one pair of public and private keys, e.g. for different job types.  To provide simultaneous access to all authorized parties, the DEK for a confidential resource may be encrypted several times, one for each different potential consumer.
+-	There could be several consumers for the same 3MF file and at the same time some consumers might have more than a pair of public and private keys, e.g. for different job types.  To provide simultaneous access to all authorized parties, the DEK for a confidential resource may be encrypted several times, one for each different potential consumer.
 
 The KEK-DEK model provides efficiency because the (probably large) data in a confidential resource is encrypted/decrypted only once using an efficient symmetric encryption algorithm and KEK approach provides flexibility in controlling who can access the confidential data, by allowing encrypting the DEK with different KEKs.
 
@@ -139,7 +139,7 @@ The Key Store part consists of a \<keystore> element that encapsulates encryptio
 
 The \<keystore> element contains a set of \<consumer> elements and \<resourcedata> elements. Each \<consumer> element contains the information to identify a consumer key and each \<resourcedata> references the encrypted content and includes the information to be able to decrypt it, such as the encryption algorithm used and the data encryption key, encrypted with the key encryption key of each consumer.
 
-**uuid** - The KeyStore universal unique ID that allows the Key Store to be idetified over time and across physical and across applications and printers.
+**uuid** - The KeyStore universal unique ID that allows the Key Store to be identified over time and across physical and across applications and printers.
 
 When an editor modifies the Key Store, it MUST produce a new uuid to univocally identify the new keystore content.
 
@@ -156,11 +156,11 @@ Element **\<consumer>**
 | consumerid | **ST\_ResourceID** | required |   | ResourceID of this consumer resource. |
 | @anyAttribute | | | | |
 
-The \<consumer> element under a \<keystore> element contains the consumer specific information. When a \<keystore> element constains more than one consumer it means that there are more than a single recipient that could decrypt the content.
+The \<consumer> element under a \<keystore> element contains the consumer specific information. When a \<keystore> element constains more than one consumer it means that there is more than a single recipient that could decrypt the content.
 
 **consumerid** - The consumer ID attribute to be referenced from the \<decryptright> elements from a \<resourcedata> element to specify to which \<consumer> is intended the encrypted data encryption key.
 
-A consumer MUST be identified by "consumerid", an attribute in \<consumer> element,  where ConsumerId is a human readable unique identifier (Alphanumeric). Each consumer is expected to have a unique id, which is known to both a producer and consumer
+A consumer MUST be identified by "consumerid", an attribute in \<consumer> element, where consumerId is a human readable unique identifier (Alphanumeric). Each consumer is expected to have a unique id, which is known to both a producer and consumer
 
 ```xml
 <consumer id=’HP#MOP44B#SG5693454’>
@@ -171,18 +171,18 @@ A consumer MUST be identified by "consumerid", an attribute in \<consumer> eleme
 
 Element **\<keyinfo>**
 
-It is possible that a consumer has different encrypttion key pairs. In this case, additional information about the specific key pair used as Key Encryption Key is needed. This information MUST be provided using a \<keyinfo> element as defined in the XML digital signature specification (https://www.w3.org/TR/xmldsig-core1/#sec-KeyInfo). The specific key to use MUST be identified by using the \<ds:KeyValue> element with the PEM formatted public key.
+It is possible that a consumer has different encryption key pairs. In this case, additional information about the specific key pair used as Key Encryption Key is needed. This information MUST be provided using a \<keyinfo> element as defined in the XML digital signature specification (https://www.w3.org/TR/xmldsig-core1/#sec-KeyInfo). The specific key to use MUST be identified by using the \<ds:KeyValue> element with the PEM formatted public key.
 
 ##### Figure 2–1. ds:KeyInfoType schema diagram
 
 ![KeyInfoType schema design](images/2.1.ds-keyinfo.png)
 
-For the purposes of this specification, only the \<ds:KeyValue> element is supported for identifying the customer key. Consumers may disregard any pther element if present.
+For the purposes of this specification, only the \<ds:KeyValue> element is supported for identifying the customer key. Consumers may disregard any other element if present.
 
 See the following example:
 
 ```xml
-<consumer ConsumerId='HP#MOP44B#SG5693454'>
+<consumer consumerId='HP#MOP44B#SG5693454'>
   <keyinfo>
     <ds:KeyValue><!--Consumer 0 public Key in PEM format--></ds:KeyValue>
   </keyinfo>
@@ -207,17 +207,18 @@ The \<resourcedata> element under a \<keystore> element contains the resource sp
 
 When a model resource path is found in a \<resourcedata> element, the content of that file MUST be encrypted.
 
-**compression** - Compression algorithm applied before encryption the content to obtain a significant compression ratio.
+**compression** - Compression algorithm applied before encrypting the content to obtain a significant compression ratio.
 
 A producer MAY specify a compression “deflate” so the content is first compressed and then encrypted. When compression is "deflate", a consumer MUST first decrypt and then decompress the content.
 
 Example of a complete \<resourcedata> element for an encrypted resource that can be accessed by two different consumers:
+
 ```xml
 <resourcedata path=”path to encrypted file1 in package” compression="deflate">
   <encryptionmethod xenc:Algorithm="http://www.w3.org/2009/xmlenc11#aes256-gcm" />  
   <decryptright consumerindex="0">
     <encryptedkey>
-      <xenc:EncryptionMethod xenc:Algorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p" \>
+      <xenc:EncryptionMethod xenc:Algorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p" />
       <xenc:CipherData>
         <xenc:CipherValue><!-- base64(RSA2048_OAEP encrypted Data Encryption Key) --></xenc:CipherValue>
       </xenc:CipherData>
@@ -225,7 +226,7 @@ Example of a complete \<resourcedata> element for an encrypted resource that can
   </decryptright>
   <decryptright consumerindex="1">
     <encryptedkey>
-      <xenc:EncryptionMethod xenc:Algorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p" \>
+      <xenc:EncryptionMethod xenc:Algorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p" />
       <xenc:CipherData>
         <xenc:CipherValue><!-- base64(RSA2048_OAEP encrypted Data Encryption Key) --></xenc:CipherValue>
       </xenc:CipherData>
@@ -248,7 +249,7 @@ For this specification, the only algorithm supported for data encryption is AES2
 
 > AES-GCM [SP800-38D] is an authenticated encryption mechanism. It is equivalent to doing these two operations in one step - AES encryption followed by HMAC signing.
 
-> For the purposes of this specification, A-ES-GCM shall be used with a 96 bit Initialization Vector (IV) and a 128 bit Authentication Tag (T). The cipher text contains the IV first, followed by the encrypted octets and finally the Authentication tag. No padding should be used during encryption. During decryption the implementation should compare the authentication tag computed during decryption with the specified Authentication Tag, and fail if they don't match. For details on the implementation of AES-GCM, see [SP800-38D].
+> For the purposes of this specification, A-ES-GCM shall be used with a 96-bit Initialization Vector (IV) and a 128-bit Authentication Tag (T). The cipher text contains the IV first, followed by the encrypted octets and finally the Authentication tag. No padding should be used during encryption. During decryption the implementation should compare the authentication tag computed during decryption with the specified Authentication Tag and fail if they don't match. For details on the implementation of AES-GCM, see [SP800-38D].
 
 All other elements in the \<encryptionmethod> definition are ignored in this specification. Consumers may disregard these elements if present.
 
@@ -263,7 +264,7 @@ Element **\<decryptright>**
 | consumerindex | **ST\_ResourceIndex** | required | | Zero-based index to the \<customer> element containing the keys to decrypt the resource file |
 | @anyAttribute | | | | |
 
-The \<decryptright> element under a \<resourcedata> element contains the consumer specific information to decrypt the content file for a specific consumer. In particular, each \<decryptright> element contains the Date Encryption Key (DEK) encrypted with the consumer's public Key Encryption Key (KEK). 
+The \<decryptright> element under a \<resourcedata> element contains the consumer specific information to decrypt the content file for a specific consumer. Each \<decryptright> element contains the Date Encryption Key (DEK) encrypted with the consumer's public Key Encryption Key (KEK). 
 
 **consumerindex** - Index to the \<consumer> element in the Key Store to select the Customer to which the decryption key is targeted.
 
@@ -285,9 +286,9 @@ From https://www.w3.org/TR/xmlenc-core1/#sec-RSA-OAEP:
 
 > The RSAES-OAEP-ENCRYPT algorithm, as specified in RFC 3447 [PKCS1], has options that define the message digest function and mask generation function, as well as an optional PSourceAlgorithm parameter. Default values defined in RFC 3447 are SHA1 for the message digest and MGF1 with SHA1 for the mask generation function. Both the message digest and mask generation functions are used in the EME-OAEP-ENCODE operation as part of RSAES- OAEP-ENCRYPT. 
 
->  The http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p identifier defines the mask generation function as the fixed value of MGF1 with SHA1. In this case the optional xenc11:MGF element of the xenc:EncryptionMethod element MUST NOT be provided.
+> The http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p identifier defines the mask generation function as the fixed value of MGF1 with SHA1. In this case the optional xenc11:MGF element of the xenc:EncryptionMethod element MUST NOT be provided.
 
-Since the digest method and mask generation function are fully defined in the algorithm URL, it is not necessary to add extra information (such as \<digestmethod> or \<mfg> elements) in the \<xenc:EncryptionMethod> element. Consumers may disregard those element if present.
+Since the digest method and mask generation function are fully defined in the algorithm URL, it is not necessary to add extra information (such as \<digestmethod> or \<mfg> elements) in the \<xenc:EncryptionMethod> element. Consumers may disregard those elements if present.
 
 The \<xenc:CipherData> element contains the encrypted key payload for a specific customer. It follows the syntax defined in http://www.w3.org/TR/xmlenc-core1/#sec-CipherData.
 
@@ -309,7 +310,7 @@ The Key Store MUST be defined in the OPC ContentTypes part by overriding the def
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
     <Default ContentType="application/vnd.openxmlformats-package.relationships+xml" Extension="rels"/>
-    <Override ContentType="application/vnd.ms-package.3dmanufacturing-3dmodel+xml" PartName="/3D/3Dmodel.moodel"/>
+    <Override ContentType="application/vnd.ms-package.3dmanufacturing-3dmodel+xml" PartName="/3D/3Dmodel.model"/>
     <Override ContentType="application/vnd.ms-package.3dmanufacturing-keystore+xml" PartName="/Secure/keystore.xml"/>
     <Default ContentType="image/png" Extension="png"/>
 </Types>
@@ -321,7 +322,7 @@ The Key Store file MUST always be referenced in the root .rels file in order to 
 
 The Key Store file SHOULD be specified as a MustPreserve relationship type, in order that editors that do not support this extension are still instructed to save it back when modifying the 3MF.
 
-Example root .rels file, where the keystore part is referenced twice: one the KeyStore relationship type and a second for the MustPreserve relationship type.
+Example root .rels file, where the keystore part is referenced twice: one for the KeyStore relationship type and a second for the MustPreserve relationship type.
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
