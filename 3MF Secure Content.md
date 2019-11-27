@@ -13,7 +13,7 @@
 
 
 
-| **Version** | 0.8 |
+| **Version** | 0.81 |
 | --- | --- |
 | **Status** | Draft |
 
@@ -153,40 +153,23 @@ Element **\<consumer>**
 
 | Name   | Type   | Use   | Default   | Annotation |
 | --- | --- | --- | --- | --- |
-| consumerid | **ST\_ResourceID** | required |   | ResourceID of this consumer resource. |
+| consumerid | **string** | required |   | ID of the target consumer. |
+| keyid | **string** | |   | Optional key identifier. |
 | @anyAttribute | | | | |
 
-The \<consumer> element under a \<keystore> element contains the consumer specific information. When a \<keystore> element constains more than one consumer it means that there is more than a single recipient that could decrypt the content.
+The \<consumer> element under a \<keystore> element contains the target consumer specific information. When a \<keystore> element constains more than one consumer it means that there is more than a single recipient that could decrypt the content.
 
-**consumerid** - The consumer ID attribute to be referenced from the \<decryptright> elements from a \<resourcedata> element to specify to which \<consumer> is intended the encrypted data encryption key.
+**consumerid** - The consumer ID attribute to be referenced from the \<decryptright> elements from a \<resourcedata> element to specify to which \<consumer> is intended the encrypted content.
 
-A consumer MUST be identified by "consumerid", an attribute in \<consumer> element, where consumerId is a human readable unique identifier (Alphanumeric). Each consumer is expected to have a unique id, which is known to both a producer and consumer
+A consumer MUST be identified by "consumerid", an attribute in \<consumer> element, where consumerid is a human readable unique identifier (Alphanumeric). Each consumer is expected to have a unique id, which is known to both producer and consumer.
 
-```xml
-<consumer id=’HP#MOP44B#SG5693454’>
-<consumer id=’HP#MOP44B#SG1632635’>
-```
+**keyid** - The optional alphanumeric key identifier attribute for identifying the consumer's Key Encryption Key (KEK), which it is used for encrypting the data encryption keys targeted to this consumer.
 
-### 2.1.1 Key Info
-
-Element **\<keyinfo>**
-
-It is possible that a consumer has different encryption key pairs. In this case, additional information about the specific key pair used as Key Encryption Key is needed. This information MUST be provided using a \<keyinfo> element as defined in the XML digital signature specification (https://www.w3.org/TR/xmldsig-core1/#sec-KeyInfo). The specific key to use MUST be identified by using the \<ds:KeyValue> element with the PEM formatted public key.
-
-##### Figure 2–1. ds:KeyInfoType schema diagram
-
-![KeyInfoType schema design](images/2.1.ds-keyinfo.png)
-
-For the purposes of this specification, only the \<ds:KeyValue> element is supported for identifying the customer key. Consumers may disregard any other element if present.
-
-See the following example:
+It is possible that a consumer has different encryption key pairs. In this case, additional information about the specific key pair used as Key Encryption Key is needed. This information MAY be provided by specifying the key identification.
 
 ```xml
-<consumer consumerId='HP#MOP44B#SG5693454'>
-  <keyinfo>
-    <ds:KeyValue><!--Consumer 0 public Key in PEM format--></ds:KeyValue>
-  </keyinfo>
-</consumer>
+<consumer consumerid=’HP#MOP44B#SG5693454’ keyid="KEK_xxx">
+<consumer consumerid=’HP#MOP44B#SG1632635’ keyid="KEK_yyy">
 ```
 
 ## 2.2 Resource Data
@@ -264,7 +247,7 @@ Element **\<decryptright>**
 | consumerindex | **ST\_ResourceIndex** | required | | Zero-based index to the \<customer> element containing the keys to decrypt the resource file |
 | @anyAttribute | | | | |
 
-The \<decryptright> element under a \<resourcedata> element contains the consumer specific information to decrypt the content file for a specific consumer. Each \<decryptright> element contains the Date Encryption Key (DEK) encrypted with the consumer's public Key Encryption Key (KEK). 
+The \<decryptright> element under a \<resourcedata> element contains the consumer specific information to decrypt the content file for a specific consumer. Each \<decryptright> element contains the Data Encryption Key (DEK) encrypted with the consumer's public Key Encryption Key (KEK). 
 
 **consumerindex** - Index to the \<consumer> element in the Key Store to select the Customer to which the decryption key is targeted.
 
@@ -344,10 +327,9 @@ See [the 3MF Core Specification glossary](https://github.com/3MFConsortium/spec_
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
-<xs:schema xmlns="http://schemas.microsoft.com/3dmanufacturing/securecontent/2019/04" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xenc="http://www.w3.org/2001/04/xmlenc#" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" targetNamespace="http://schemas.microsoft.com/3dmanufacturing/securecontent/2019/04" elementFormDefault="unqualified" attributeFormDefault="unqualified" blockDefault="#all">
+<xs:schema xmlns="http://schemas.microsoft.com/3dmanufacturing/securecontent/2019/04" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xenc="http://www.w3.org/2001/04/xmlenc#" targetNamespace="http://schemas.microsoft.com/3dmanufacturing/securecontent/2019/04" elementFormDefault="unqualified" attributeFormDefault="unqualified" blockDefault="#all">
   <xs:import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="http://www.w3.org/2001/xml.xsd"/>
   <xs:import namespace="http://www.w3.org/2001/04/xmlenc#" schemaLocation="https://www.w3.org/TR/xmlenc-core1/xenc-schema.xsd"/>
-  <xs:import namespace='http://www.w3.org/2000/09/xmldsig#' schemaLocation='http://www.w3.org/TR/2002/REC-xmldsig-core-20020212/xmldsig-core-schema.xsd'/>
   <xs:annotation>
     <xs:documentation><![CDATA[   Schema notes: 
  
@@ -370,11 +352,8 @@ See [the 3MF Core Specification glossary](https://github.com/3MFConsortium/spec_
     <xs:anyAttribute namespace="##other" processContents="lax"/>
   </xs:complexType>
   <xs:complexType name="CT_Consumer">
-    <xs:sequence>
-      <xs:element ref="keyinfo" minOccurs="0"/>
-       <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="2147483647"/>
-    </xs:sequence>
-    <xs:attribute name="consumerid" type="xs:string"/>
+    <xs:attribute name="consumerid" type="xs:string" use="required"/>
+    <xs:attribute name="keyid" type="xs:string"/>
     <xs:anyAttribute namespace="##other" processContents="lax"/>
   </xs:complexType>
   <xs:complexType name="CT_ResourceData">
@@ -398,11 +377,6 @@ See [the 3MF Core Specification glossary](https://github.com/3MFConsortium/spec_
    <xs:simpleType name="ST_Path">
     <xs:restriction base="xs:string"/>
   </xs:simpleType>
-  <xs:simpleType name="ST_ResourceID">
-    <xs:restriction base="xs:positiveInteger">
-      <xs:maxExclusive value="2147483648"/>
-    </xs:restriction>
-  </xs:simpleType>
   <xs:simpleType name="ST_ResourceIndex">
     <xs:restriction base="xs:nonNegativeInteger">
       <xs:maxExclusive value="2147483648"/>
@@ -424,7 +398,6 @@ See [the 3MF Core Specification glossary](https://github.com/3MFConsortium/spec_
   <xs:element name="consumer" type="CT_Consumer"/>
   <xs:element name="resourcedata" type="CT_ResourceData"/>
   <xs:element name="decryptright" type="CT_DecryptRight"/>
-  <xs:element name="keyinfo" type="ds:KeyInfoType"/>
   <xs:element name="encryptionmethod" type="xenc:EncryptionMethodType"/>
   <xs:element name="encryptedkey" type="xenc:EncryptedKeyType"/>
 </xs:schema>
