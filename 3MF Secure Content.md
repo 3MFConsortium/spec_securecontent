@@ -29,7 +29,7 @@
     + [1.1 Encryption scheme](#11-encryption-scheme)
     + [1.2 Model Relationships](#12-model-relationships)
     + [1.3 Package Organization and OPC Compliance](#13-package-organization-and-opc-compliance)
-  * [Chapter 2. Key Store](#2-key-store)
+  * [Chapter 2. Key Store](#chapter-2-key-store)
       - [2.1 Consumer](#21-consumer)
       - [2.2 Resource Data](#22-resource-data)
   * [Chapter 3. OPC Relation and Content Types](#chapter-3-opc-relation-and-content-types)
