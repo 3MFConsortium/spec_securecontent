@@ -13,7 +13,7 @@
 
 
 
-| **Version** | 0.81 |
+| **Version** | 0.83 |
 | --- | --- |
 | **Status** | Draft |
 
@@ -92,11 +92,13 @@ The encryption model used is a 'two-level' Key Encryption Key - Data Encryption 
 
 - Each confidential resource is encrypted using an efficient symmetric Data Encryption Method, with a randomly generated symmetric Data Encryption Key (DEK). There may be several resources in a 3MF package that requires confidentiality, so different DEKs MUST be provided for each one of them. In the current proposal, the only Data Encryption Method supported is AES256 GCM (Gaulois Counter Mode). In the future other Data Encryption Methods may be supported.
 
-- The DEK for each one of the confidential resources is encrypted with one or several Key Encryption Keys (KEK), using Key Encryption Methods that ensure that only the intended consumers can decrypt and use the DEK. This means that the consumers must have an RSA2048 asymmetric private decryption key, and the corresponding public key must be made available to the producer to encrypt the DEK. In this proposal, the only Key Encryption Method supported is asymmetric RSA2048 OAEP. In the future, other Key Encryption Methods may be supported.
+- The DEK for each one of the confidential resources may be encrypted with one or several Key Encryption Keys (KEK), using Key Encryption Methods that ensure that only the intended consumers can decrypt and use the DEK. This means that the consumers must have an RSA2048 asymmetric private decryption key, and the corresponding public key must be made available to the producer to encrypt the DEK. In this proposal, the only Key Encryption Method supported is asymmetric RSA2048 OAEP. In the future, other Key Encryption Methods may be supported.
 
 -	There could be several consumers for the same 3MF file and at the same time some consumers might have more than a pair of public and private keys, e.g. for different job types.  To provide simultaneous access to all authorized parties, the DEK for a confidential resource may be encrypted several times, one for each different potential consumer.
 
 The KEK-DEK model provides efficiency because the (probably large) data in a confidential resource is encrypted/decrypted only once using an efficient symmetric encryption algorithm and KEK approach provides flexibility in controlling who can access the confidential data, by allowing encrypting the DEK with different KEKs.
+
+The mechanism for storing teh DEK in the 3MF is optional. It provides a mean to communicate the DEK for eack part. However the DEKs might be transferred to the consumer by any other mean, externally to the 3MF file.
 
 ## 1.2 Parts Relationships
 
@@ -170,6 +172,38 @@ It is possible that a consumer has different encryption key pairs. In this case,
 ```xml
 <consumer consumerid=’HP#MOP44B#SG5693454’ keyid="KEK_xxx">
 <consumer consumerid=’HP#MOP44B#SG1632635’ keyid="KEK_yyy">
+```
+
+#### 2.1.1 Key Value
+
+Element **\<keyvalue>**
+
+Additional information about the public key used as Key Encryption Key MAY be provided using a \<keyvalue> element as defined in the XML digital signature specification (https://www.w3.org/TR/xmldsig-core1/#sec-KeyValue). The specific key to use MUST be identified by using the \<ds:KeyValue> element with the PEM formatted public key.
+
+##### Figure 2–1. ds:KeyValueType schema diagram
+
+![KeyInfoType schema design](images/2.1.1.ds-keyvalue.png)
+
+For the purposes of this specification, only the \<ds:RSAKeyValue> element is supported for identifying the customer key. Consumers MAY disregard any other element if present.
+
+See the following example:
+
+```xml
+<consumer ConsumerId='HP#MOP44B#SG5693454' keyid="KEK_xxx">
+  <keyvalue>
+    <ds:RSAKeyValue>
+      <ds:Modulus>
+xs1GwyPre7/knVd3CAO1pyk++yp/qmBz2TekgrehYTWU7hs8bUCeVQrL2O
+B+jm/AgjdPMohWHD/tLcJy35aZgVfPI3Oa3gmXxdoLZrfNRbnrCm3Xr1MR
+7wnhMyBt5XXyU/FiF46g5qJ2DUIUg7teoKDNUSAN81JTIoH0KC+rZBoO3t
+u9PR7H75K5G2eT6oUWkWKcZZU/4WNCDasNtizTe41Jy99BjrChww5r2ctq
+G8LvIv7UeeFaK1vhxGKaNH/7JvKJI9LbewWNtmb/nRzQg9xK3e0OhblbW+
+o6zg5pTw+n37fS7pkXK7lbRfUfaQmhoGy6ox4UWGmOgm8yPu8S4Q==
+      </ds:Modulus>
+      <ds:Exponent>AQAB<ds:Exponent>
+    </ds:RSAKeyValue>
+  </keyvalue>
+</consumer>
 ```
 
 ## 2.2 Resource Data
@@ -327,9 +361,10 @@ See [the 3MF Core Specification glossary](https://github.com/3MFConsortium/spec_
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
-<xs:schema xmlns="http://schemas.microsoft.com/3dmanufacturing/securecontent/2019/04" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xenc="http://www.w3.org/2001/04/xmlenc#" targetNamespace="http://schemas.microsoft.com/3dmanufacturing/securecontent/2019/04" elementFormDefault="unqualified" attributeFormDefault="unqualified" blockDefault="#all">
+<xs:schema xmlns="http://schemas.microsoft.com/3dmanufacturing/securecontent/2019/04" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xenc="http://www.w3.org/2001/04/xmlenc#" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" targetNamespace="http://schemas.microsoft.com/3dmanufacturing/securecontent/2019/04" elementFormDefault="unqualified" attributeFormDefault="unqualified" blockDefault="#all">
   <xs:import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="http://www.w3.org/2001/xml.xsd"/>
   <xs:import namespace="http://www.w3.org/2001/04/xmlenc#" schemaLocation="https://www.w3.org/TR/xmlenc-core1/xenc-schema.xsd"/>
+  <xs:import namespace="http://www.w3.org/2000/09/xmldsig#" schemaLocation="http://www.w3.org/TR/2002/REC-xmldsig-core-20020212/xmldsig-core-schema.xsd"/>
   <xs:annotation>
     <xs:documentation><![CDATA[   Schema notes: 
  
@@ -352,6 +387,10 @@ See [the 3MF Core Specification glossary](https://github.com/3MFConsortium/spec_
     <xs:anyAttribute namespace="##other" processContents="lax"/>
   </xs:complexType>
   <xs:complexType name="CT_Consumer">
+    <xs:sequence>
+      <xs:element ref="keyvalue" minOccurs="0"/>
+      <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="2147483647"/>
+    </xs:sequence>
     <xs:attribute name="consumerid" type="xs:string" use="required"/>
     <xs:attribute name="keyid" type="xs:string"/>
     <xs:anyAttribute namespace="##other" processContents="lax"/>
@@ -400,6 +439,7 @@ See [the 3MF Core Specification glossary](https://github.com/3MFConsortium/spec_
   <xs:element name="decryptright" type="CT_DecryptRight"/>
   <xs:element name="encryptionmethod" type="xenc:EncryptionMethodType"/>
   <xs:element name="encryptedkey" type="xenc:EncryptedKeyType"/>
+  <xs:element name="keyvalue" type="ds:KeyValueType"/>
 </xs:schema>
 ```
 
