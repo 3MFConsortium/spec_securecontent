@@ -13,7 +13,7 @@
 
 
 
-| **Version** | 0.83 |
+| **Version** | 0.84 |
 | --- | --- |
 | **Status** | Draft |
 
@@ -41,7 +41,6 @@
   * [Appendix C. Standard Content Types and Relationships](#appendix-c-standard-content-types-and-relationships)
     + [C.1 Content Types](#c1-content-types)
     + [C.2 Relationships](#c2-relationships)
-  * [Appendix D: Example file](#appendix-d-example-file)
 - [References](#references)
 
 # Preface
@@ -156,6 +155,7 @@ Element **\<consumer>**
 | Name   | Type   | Use   | Default   | Annotation |
 | --- | --- | --- | --- | --- |
 | consumerid | **string** | required |   | ID of the target consumer. |
+| encryptionalgorithm | **anyURI** | |   | Encryption algorithm used to encrypt the resource DEK. |
 | keyid | **string** | |   | Optional key identifier. |
 | @anyAttribute | | | | |
 
@@ -165,13 +165,27 @@ The \<consumer> element under a \<keystore> element contains the target consumer
 
 A consumer MUST be identified by "consumerid", an attribute in \<consumer> element, where consumerid is a human readable unique identifier (Alphanumeric). Each consumer is expected to have a unique id, which is known to both producer and consumer.
 
+**encryptionalgorithm** - Encryption algorithm used to encrypt the Data Encryption Key (DEK) using the consumer's Key Encryption Key (KEK).
+
+For this specification, the only algorithm supported for key encryption is RSA OAEP with MFG1 with SHA1 mask generation, identified with the URI http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p.
+
+From https://www.w3.org/TR/xmlenc-core1/#sec-RSA-OAEP:
+
+> The RSAES-OAEP-ENCRYPT algorithm, as specified in RFC 3447 [PKCS1], has options that define the message digest function and mask generation function, as well as an optional PSourceAlgorithm parameter. Default values defined in RFC 3447 are SHA1 for the message digest and MGF1 with SHA1 for the mask generation function. Both the message digest and mask generation functions are used in the EME-OAEP-ENCODE operation as part of RSAES- OAEP-ENCRYPT. 
+
+> The http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p identifier defines the mask generation function as the fixed value of MGF1 with SHA1. In this case the optional xenc11:MGF element of the xenc:EncryptionMethod element MUST NOT be provided.
+
 **keyid** - The optional alphanumeric key identifier attribute for identifying the consumer's Key Encryption Key (KEK), which it is used for encrypting the data encryption keys targeted to this consumer.
 
 It is possible that a consumer has different encryption key pairs. In this case, additional information about the specific key pair used as Key Encryption Key is needed. This information MAY be provided by specifying the key identification.
 
+See the following example:
+
 ```xml
-<consumer consumerid=’HP#MOP44B#SG5693454’ keyid="KEK_xxx">
-<consumer consumerid=’HP#MOP44B#SG1632635’ keyid="KEK_yyy">
+<consumer consumerid=’HP#MOP44B#SG5693454’ keyid="KEK_xxx"
+  encryptionalgorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p">
+<consumer consumerid=’HP#MOP44B#SG1632635’ keyid="KEK_yyy"
+  encryptionalgorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p">
 ```
 
 #### 2.1.1 Key Value
@@ -189,7 +203,8 @@ For the purposes of this specification, only the \<ds:RSAKeyValue> element is su
 See the following example:
 
 ```xml
-<consumer ConsumerId='HP#MOP44B#SG5693454' keyid="KEK_xxx">
+<consumer consumerid='HP#MOP44B#SG5693454' keyid="KEK_xxx"
+  encryptionalgorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p">
   <keyvalue>
     <ds:RSAKeyValue>
       <ds:Modulus>
@@ -215,6 +230,7 @@ Element **\<resourcedata>**
 | Name   | Type   | Use   | Default   | Annotation |
 | --- | --- | --- | --- | --- |
 | path | **ST\_Path** | required |  | Path to the encrypted resource file. |
+| encryptionalgorithm | **anyURI** | |   | Encryption algorithm used to encrypt the resource data. |
 | compression | **ST\_Compression** |  | none | Compression algorithm applied to content before is encrypted. |
 | @anyAttribute | | | | |
 
@@ -224,43 +240,7 @@ The \<resourcedata> element under a \<keystore> element contains the resource sp
 
 When a model resource path is found in a \<resourcedata> element, the content of that file MUST be encrypted.
 
-**compression** - Compression algorithm applied before encrypting the content to obtain a significant compression ratio.
-
-A producer MAY specify a compression “deflate” so the content is first compressed and then encrypted. When compression is "deflate", a consumer MUST first decrypt and then decompress the content.
-
-Example of a complete \<resourcedata> element for an encrypted resource that can be accessed by two different consumers:
-
-```xml
-<resourcedata path=”path to encrypted file1 in package” compression="deflate">
-  <encryptionmethod xenc:Algorithm="http://www.w3.org/2009/xmlenc11#aes256-gcm" />  
-  <decryptright consumerindex="0">
-    <encryptedkey>
-      <xenc:EncryptionMethod xenc:Algorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p" />
-      <xenc:CipherData>
-        <xenc:CipherValue><!-- base64(RSA2048_OAEP encrypted Data Encryption Key) --></xenc:CipherValue>
-      </xenc:CipherData>
-    </encryptedkey>
-  </decryptright>
-  <decryptright consumerindex="1">
-    <encryptedkey>
-      <xenc:EncryptionMethod xenc:Algorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p" />
-      <xenc:CipherData>
-        <xenc:CipherValue><!-- base64(RSA2048_OAEP encrypted Data Encryption Key) --></xenc:CipherValue>
-      </xenc:CipherData>
-    </encryptedkey>
-  </decryptright>
-</resourcedata>
-```
-
-### 2.2.1 Encryption Method
-
-Element **\<encryptionmethod>**
-
-The \<encryptionmethod> element under the \<resourcedata> element contains the information on the encryption algorithm used to encrypt the reource data. It follows the syntax defined in as defined in the W3C XML Encryption specification (https://www.w3.org/TR/xmlenc-core1/#sec-EncryptionMethod).
-
-##### Figure 2–2. xenc:EncryptionMethodType schema diagram
-
-![Encryption Method schema design](images/2.2.1.xenc-encryptionmethod.png)
+**encryptionalgorithm** - Encryption algorithm used to encrypt the resource data. 
 
 For this specification, the only algorithm supported for data encryption is AES256-GCM, identified with the URI http://www.w3.org/2009/xmlenc11#aes256-gcm:
 
@@ -268,9 +248,31 @@ For this specification, the only algorithm supported for data encryption is AES2
 
 > For the purposes of this specification, A-ES-GCM shall be used with a 96-bit Initialization Vector (IV) and a 128-bit Authentication Tag (T). The cipher text contains the IV first, followed by the encrypted octets and finally the Authentication tag. No padding should be used during encryption. During decryption the implementation should compare the authentication tag computed during decryption with the specified Authentication Tag and fail if they don't match. For details on the implementation of AES-GCM, see [SP800-38D].
 
-All other elements in the \<encryptionmethod> definition are ignored in this specification. Consumers may disregard these elements if present.
+**compression** - Compression algorithm applied before encrypting the content to obtain a significant compression ratio.
 
-### 2.2.2 Decrypt Right
+A producer MAY specify a compression “deflate” so the content is first compressed and then encrypted. When compression is "deflate", a consumer MUST first decrypt and then decompress the content.
+
+Example of a complete \<resourcedata> element for an encrypted resource that can be accessed by two different consumers:
+
+```xml
+<resourcedata
+  path="path to encrypted file1 in package"
+  encryptionalgorithm="http://www.w3.org/2009/xmlenc11#aes256-gcm" 
+  compression="deflate">
+  <decryptright consumerindex="0">
+    <cipherdata>
+      <xenc:CipherValue><!-- base64(RSA2048_OAEP encrypted Data Encryption Key) --></xenc:CipherValue>
+    </xenc:CipherData>
+  </decryptright>
+  <decryptright consumerindex="1">
+    <cipherdata>
+      <xenc:CipherValue><!-- base64(RSA2048_OAEP encrypted Data Encryption Key) --></xenc:CipherValue>
+    </xenc:CipherData>
+  </decryptright>
+</resourcedata>
+```
+
+### 2.2.1 Decrypt Right
 
 Element **\<decryptright>**
 
@@ -285,33 +287,17 @@ The \<decryptright> element under a \<resourcedata> element contains the consume
 
 **consumerindex** - Index to the \<consumer> element in the Key Store to select the Customer to which the decryption key is targeted.
 
-#### 2.2.2.1 Encrypted key
+#### 2.2.2.1 Cipher Data
 
-Element **\<encryptedkey>**
+Element **\<cipherdata>**
 
-The \<encryptedkey> element under the \<decryptright> element contains the public key to decrypt the content file, but encrypted for a specific consumer, granting its decryption rights.
+The \<cipherdata> element under the \<decryptright> element contains the public key to decrypt the content file, which is encrypted for a specific consumer, granting its decryption rights.
 
-##### Figure 2–3. xenc:EncryptedKeyType schema diagram
+##### Figure 2–2. xenc:CipherData schema diagram
 
-![Encrypted Key schema design](images/2.2.2.1.xenc-encryptedkey.png)
-
- For this specification, the only elements \<xenc:EncryptedKey> and \<xenc:CipherData> are supported.
-
- The information on the algorithm used to encrypt the Data Encryption Key (DEK) using the consumer's Key Encryption Key (KEK). It follows the syntax defined in https://www.w3.org/TR/xmlenc-core1/#sec-EncryptionMethod. For this specification, the only algorithm supported for key encryption is RSA OAEP with MFG1 with SHA1 mask generation, identified with the URI http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p.
-
-From https://www.w3.org/TR/xmlenc-core1/#sec-RSA-OAEP:
-
-> The RSAES-OAEP-ENCRYPT algorithm, as specified in RFC 3447 [PKCS1], has options that define the message digest function and mask generation function, as well as an optional PSourceAlgorithm parameter. Default values defined in RFC 3447 are SHA1 for the message digest and MGF1 with SHA1 for the mask generation function. Both the message digest and mask generation functions are used in the EME-OAEP-ENCODE operation as part of RSAES- OAEP-ENCRYPT. 
-
-> The http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p identifier defines the mask generation function as the fixed value of MGF1 with SHA1. In this case the optional xenc11:MGF element of the xenc:EncryptionMethod element MUST NOT be provided.
-
-Since the digest method and mask generation function are fully defined in the algorithm URL, it is not necessary to add extra information (such as \<digestmethod> or \<mfg> elements) in the \<xenc:EncryptionMethod> element. Consumers may disregard those elements if present.
+![Encrypted Key schema design](images/2.2.2.1.xenc-cipherdata.png)
 
 The \<xenc:CipherData> element contains the encrypted key payload for a specific customer. It follows the syntax defined in http://www.w3.org/TR/xmlenc-core1/#sec-CipherData.
-
-##### Figure 2–4. xenc:CipherDataType schema diagram
-
-![Cipher Data schema design](images/2.2.2.1.xenc-cipherdata.png)
 
 For the purposes of this specification only the \<xenc:CipherValue> element is supported. Consumers may disregard any other element if present.
 
@@ -392,22 +378,23 @@ See [the 3MF Core Specification glossary](https://github.com/3MFConsortium/spec_
       <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="2147483647"/>
     </xs:sequence>
     <xs:attribute name="consumerid" type="xs:string" use="required"/>
+    <xs:attribute name='encryptionalgorithm' type='xs:anyURI'/>
     <xs:attribute name="keyid" type="xs:string"/>
     <xs:anyAttribute namespace="##other" processContents="lax"/>
   </xs:complexType>
   <xs:complexType name="CT_ResourceData">
     <xs:sequence>
-      <xs:element ref="encryptionmethod"/>
       <xs:element ref="decryptright" minOccurs="0" maxOccurs="2147483647"/>
       <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="2147483647"/>
     </xs:sequence>
     <xs:attribute name="path" type="ST_Path" use="required"/>
+    <xs:attribute name='encryptionalgorithm' type='xs:anyURI'/>
     <xs:attribute name="compression" type="ST_Compression" default="none"/>
     <xs:anyAttribute namespace="##other" processContents="lax"/>
   </xs:complexType>
   <xs:complexType name="CT_DecryptRight">
     <xs:sequence>
-      <xs:element ref="encryptedkey"/>
+      <xs:element ref="cipherdata"/>
       <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="2147483647"/>
     </xs:sequence>
     <xs:attribute name="consumerindex" type="ST_ResourceIndex" use="required"/>
@@ -437,8 +424,7 @@ See [the 3MF Core Specification glossary](https://github.com/3MFConsortium/spec_
   <xs:element name="consumer" type="CT_Consumer"/>
   <xs:element name="resourcedata" type="CT_ResourceData"/>
   <xs:element name="decryptright" type="CT_DecryptRight"/>
-  <xs:element name="encryptionmethod" type="xenc:EncryptionMethodType"/>
-  <xs:element name="encryptedkey" type="xenc:EncryptedKeyType"/>
+  <xs:element name="cipherdata" type="xenc:CipherData"/>
   <xs:element name="keyvalue" type="ds:KeyValueType"/>
 </xs:schema>
 ```
@@ -452,13 +438,6 @@ Secure Content application/vnd.ms-package.3dmanufacturing-keystore+xml
 ## C.2 Relationships
 
 Secure Content [http://schemas.microsoft.com/3dmanufacturing/2019/04/keystore](http://schemas.microsoft.com/3dmanufacturing/2019/04/keystore)
-
-# Appendix D: Example file
-
-## 3D model
-```xml
-<!-- TODO Example -->
-```
 
 # References
 
