@@ -13,7 +13,7 @@
 
 
 
-| **Version** | 0.84 |
+| **Version** | 0.85 |
 | --- | --- |
 | **Status** | Draft |
 
@@ -89,11 +89,11 @@ A consumer that is authorized to un-protect content by reversing the above steps
 
 The encryption model used is a 'two-level' Key Encryption Key - Data Encryption Key (KEK-DEK) model:
 
-- Each confidential resource is encrypted using an efficient symmetric Data Encryption Method, with a randomly generated symmetric Data Encryption Key (DEK). There may be several resources in a 3MF package that requires confidentiality, so different DEKs MUST be provided for each one of them. In the current proposal, the only Data Encryption Method supported is AES256 GCM (Gaulois Counter Mode). In the future other Data Encryption Methods may be supported.
+- Each confidential resource is encrypted using an efficient symmetric Data Encryption Method, with a randomly generated symmetric Data Encryption Key (DEK). There may be several resources in a 3MF package that requires confidentiality, so different DEKs MUST be provided for each one of them. Consumers MUST support, at a minimum the AES256 GCM (Gaulois Counter Mode).
 
-- The DEK for each one of the confidential resources may be encrypted with one or several Key Encryption Keys (KEK), using Key Encryption Methods that ensure that only the intended consumers can decrypt and use the DEK. This means that the consumers must have an RSA2048 asymmetric private decryption key, and the corresponding public key must be made available to the producer to encrypt the DEK. In this proposal, the only Key Encryption Method supported is asymmetric RSA2048 OAEP. In the future, other Key Encryption Methods may be supported.
+- The DEK for each one of the confidential resources may be encrypted with one or several Key Encryption Keys (KEK), using Key Encryption Methods that ensure that only the intended consumers can decrypt and use the DEK. This means that the consumers must have an RSA2048 asymmetric private decryption key, and the corresponding public key must be made available to the producer to encrypt the DEK. Cunsumer MUST support, at a minimum, the asymmetric RSA2048 OAEP Key Encryption Method.
 
--	There could be several consumers for the same 3MF file and at the same time some consumers might have more than a pair of public and private keys, e.g. for different job types.  To provide simultaneous access to all authorized parties, the DEK for a confidential resource may be encrypted several times, one for each different potential consumer.
+-	There could be several consumers for the same 3MF file and at the same time some consumers might have more than a pair of public and private keys, e.g. for different job types. To provide simultaneous access to all authorized parties, the DEK for a confidential resource may be encrypted several times, one for each different potential consumer.
 
 The KEK-DEK model provides efficiency because the (probably large) data in a confidential resource is encrypted/decrypted only once using an efficient symmetric encryption algorithm and KEK approach provides flexibility in controlling who can access the confidential data, by allowing encrypting the DEK with different KEKs.
 
@@ -120,7 +120,9 @@ For each confidential resource, the KeyStore contains:
 
 - Information on how the content is encrypted: the Data Encryption Method, and other information relevant to enable content decryption. For the only currently supported Data Encryption Method, the additional information is the initialization vector (IV) and tag required for decryption in the AES256 GCM Method.
 
-- One DEK encrypted using a KEKs, with the corresponding information about the Key Encryption Method used, for each one of the consumers authorized to access confidential content. Currently it is supported only one Key Encryption Method: RSA2048 OAEP.
+- One DEK encrypted using a KEKs, with the corresponding information about the Key Encryption Method used, for each one of the consumers authorized to access confidential content.
+
+A consumer supporting the 3MF Secure Content Extension MUST support, at a minimum, the RSA2048 OAEP Key Encryption Algorithm.
 
 ##### Figure 1–1. A typical 3MF Secure Content Document with multiple encrypted model streams
 ![OPC organization](images/1.1.opc_organization.png)
@@ -155,7 +157,6 @@ Element **\<consumer>**
 | Name   | Type   | Use   | Default   | Annotation |
 | --- | --- | --- | --- | --- |
 | consumerid | **string** | required |   | ID of the target consumer. |
-| encryptionalgorithm | **anyURI** | |   | Encryption algorithm used to encrypt the resource DEK. |
 | keyid | **string** | |   | Optional key identifier. |
 | @anyAttribute | | | | |
 
@@ -164,16 +165,6 @@ The \<consumer> element under a \<keystore> element contains the target consumer
 **consumerid** - The consumer ID attribute to be referenced from the \<decryptright> elements from a \<resourcedata> element to specify to which \<consumer> is intended the encrypted content.
 
 A consumer MUST be identified by "consumerid", an attribute in \<consumer> element, where consumerid is a human readable unique identifier (Alphanumeric). Each consumer is expected to have a unique id, which is known to both producer and consumer.
-
-**encryptionalgorithm** - Encryption algorithm used to encrypt the Data Encryption Key (DEK) using the consumer's Key Encryption Key (KEK).
-
-For this specification, the only algorithm supported for key encryption is RSA OAEP with MFG1 with SHA1 mask generation, identified with the URI http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p.
-
-From https://www.w3.org/TR/xmlenc-core1/#sec-RSA-OAEP:
-
-> The RSAES-OAEP-ENCRYPT algorithm, as specified in RFC 3447 [PKCS1], has options that define the message digest function and mask generation function, as well as an optional PSourceAlgorithm parameter. Default values defined in RFC 3447 are SHA1 for the message digest and MGF1 with SHA1 for the mask generation function. Both the message digest and mask generation functions are used in the EME-OAEP-ENCODE operation as part of RSAES- OAEP-ENCRYPT. 
-
-> The http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p identifier defines the mask generation function as the fixed value of MGF1 with SHA1. In this case the optional xenc11:MGF element of the xenc:EncryptionMethod element MUST NOT be provided.
 
 **keyid** - The optional alphanumeric key identifier attribute for identifying the consumer's Key Encryption Key (KEK), which it is used for encrypting the data encryption keys targeted to this consumer.
 
@@ -203,8 +194,7 @@ For the purposes of this specification, only the \<ds:RSAKeyValue> element is su
 See the following example:
 
 ```xml
-<consumer consumerid='HP#MOP44B#SG5693454' keyid="KEK_xxx"
-  encryptionalgorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p">
+<consumer consumerid='HP#MOP44B#SG5693454' keyid="KEK_xxx">
   <keyvalue>
     <ds:RSAKeyValue>
       <ds:Modulus>
@@ -242,7 +232,7 @@ When a model resource path is found in a \<resourcedata> element, the content of
 
 **encryptionalgorithm** - Encryption algorithm used to encrypt the resource data. 
 
-For this specification, the only algorithm supported for data encryption is AES256-GCM, identified with the URI http://www.w3.org/2009/xmlenc11#aes256-gcm:
+A consumer supporting the 3MF Secure Content Extension MUST support, at a minimum, the AES256-GCM algorithm, identified with the URI http://www.w3.org/2009/xmlenc11#aes256-gcm:
 
 > AES-GCM [SP800-38D] is an authenticated encryption mechanism. It is equivalent to doing these two operations in one step - AES encryption followed by HMAC signing.
 
@@ -259,12 +249,14 @@ Example of a complete \<resourcedata> element for an encrypted resource that can
   path="path to encrypted file1 in package"
   encryptionalgorithm="http://www.w3.org/2009/xmlenc11#aes256-gcm" 
   compression="deflate">
-  <decryptright consumerindex="0">
+  <decryptright consumerindex="0"
+    encryptionalgorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p">
     <cipherdata>
       <xenc:CipherValue><!-- base64(RSA2048_OAEP encrypted Data Encryption Key) --></xenc:CipherValue>
     </xenc:CipherData>
   </decryptright>
-  <decryptright consumerindex="1">
+  <decryptright consumerindex="1"
+    encryptionalgorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p">
     <cipherdata>
       <xenc:CipherValue><!-- base64(RSA2048_OAEP encrypted Data Encryption Key) --></xenc:CipherValue>
     </xenc:CipherData>
@@ -281,11 +273,22 @@ Element **\<decryptright>**
 | Name   | Type   | Use   | Default   | Annotation |
 | --- | --- | --- | --- | --- |
 | consumerindex | **ST\_ResourceIndex** | required | | Zero-based index to the \<customer> element containing the keys to decrypt the resource file |
+| encryptionalgorithm | **anyURI** | |   | Encryption algorithm used to encrypt the resource DEK. |
 | @anyAttribute | | | | |
 
 The \<decryptright> element under a \<resourcedata> element contains the consumer specific information to decrypt the content file for a specific consumer. Each \<decryptright> element contains the Data Encryption Key (DEK) encrypted with the consumer's public Key Encryption Key (KEK). 
 
 **consumerindex** - Index to the \<consumer> element in the Key Store to select the Customer to which the decryption key is targeted.
+
+**encryptionalgorithm** - Encryption algorithm used to encrypt the Data Encryption Key (DEK) using the consumer's Key Encryption Key (KEK).
+
+For this specification, the only algorithm supported for key encryption is RSA OAEP with MFG1 with SHA1 mask generation, identified with the URI http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p.
+
+From https://www.w3.org/TR/xmlenc-core1/#sec-RSA-OAEP:
+
+> The RSAES-OAEP-ENCRYPT algorithm, as specified in RFC 3447 [PKCS1], has options that define the message digest function and mask generation function, as well as an optional PSourceAlgorithm parameter. Default values defined in RFC 3447 are SHA1 for the message digest and MGF1 with SHA1 for the mask generation function. Both the message digest and mask generation functions are used in the EME-OAEP-ENCODE operation as part of RSAES- OAEP-ENCRYPT. 
+
+> The http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p identifier defines the mask generation function as the fixed value of MGF1 with SHA1. In this case the optional xenc11:MGF element of the xenc:EncryptionMethod element MUST NOT be provided.
 
 #### 2.2.2.1 Cipher Data
 
@@ -378,7 +381,6 @@ See [the 3MF Core Specification glossary](https://github.com/3MFConsortium/spec_
       <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="2147483647"/>
     </xs:sequence>
     <xs:attribute name="consumerid" type="xs:string" use="required"/>
-    <xs:attribute name='encryptionalgorithm' type='xs:anyURI'/>
     <xs:attribute name="keyid" type="xs:string"/>
     <xs:anyAttribute namespace="##other" processContents="lax"/>
   </xs:complexType>
@@ -398,6 +400,7 @@ See [the 3MF Core Specification glossary](https://github.com/3MFConsortium/spec_
       <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="2147483647"/>
     </xs:sequence>
     <xs:attribute name="consumerindex" type="ST_ResourceIndex" use="required"/>
+    <xs:attribute name='encryptionalgorithm' type='xs:anyURI'/>
     <xs:anyAttribute namespace="##other" processContents="lax"/>
   </xs:complexType>
    <xs:simpleType name="ST_Path">
