@@ -181,7 +181,7 @@ See the following example:
 
 Element **\<keyvalue>**
 
-Additional information about the public key used as Key Encryption Key MAY be provided using a \<keyvalue> element as defined in the XML digital signature specification (https://www.w3.org/TR/xmldsig-core1/#sec-KeyValue). The specific key to use MUST be identified by using the \<ds:KeyValue> element with the PEM formatted public key.
+Additional information about the public key used as Key Encryption Key MAY be provided using a \<keyvalue> element as defined in the XML digital signature specification (https://www.w3.org/TR/xmldsig-core1/#sec-KeyValue). The specific key to use MUST be identified using the \<ds:KeyValue> element containing the W3C XML formatted public key.
 
 ##### Figure 2–1. ds:KeyValueType schema diagram
 
