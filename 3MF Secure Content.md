@@ -173,10 +173,8 @@ It is possible that a consumer has different encryption key pairs. In this case,
 See the following example:
 
 ```xml
-<consumer consumerid=’HP#MOP44B#SG5693454’ keyid="KEK_xxx"
-  encryptionalgorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p">
-<consumer consumerid=’HP#MOP44B#SG1632635’ keyid="KEK_yyy"
-  encryptionalgorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p">
+<consumer consumerid=’HP#MOP44B#SG5693454’ keyid="KEK_xxx">
+<consumer consumerid=’HP#MOP44B#SG1632635’ keyid="KEK_yyy">
 ```
 
 #### 2.1.1 Key Value
