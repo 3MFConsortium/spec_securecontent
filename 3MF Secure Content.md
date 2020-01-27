@@ -236,6 +236,8 @@ A consumer supporting the 3MF Secure Content Extension MUST support, at a minimu
 
 > For the purposes of this specification, A-ES-GCM shall be used with a 96-bit Initialization Vector (IV) and a 128-bit Authentication Tag (T). The cipher text contains the IV first, followed by the encrypted octets and finally the Authentication tag. No padding should be used during encryption. During decryption the implementation should compare the authentication tag computed during decryption with the specified Authentication Tag and fail if they don't match. For details on the implementation of AES-GCM, see the publication [SP800-38D](https://csrc.nist.gov/publications/detail/sp/800-38d/final).
 
+>**Note:** For security, every time a file is encrypted a new Initialization Vector (IV) SHOULD be generated.
+
 **compression** - Compression algorithm applied before encrypting the content to obtain a significant compression ratio.
 
 A producer MAY specify a compression “deflate” so the content is first compressed and then encrypted. When compression is "deflate", a consumer MUST first decrypt and then decompress the content.
