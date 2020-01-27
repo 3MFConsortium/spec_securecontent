@@ -13,7 +13,7 @@
 
 
 
-| **Version** | 0.85 |
+| **Version** | 0.86 |
 | --- | --- |
 | **Status** | Draft |
 
@@ -219,7 +219,7 @@ Element **\<resourcedata>**
 | --- | --- | --- | --- | --- |
 | path | **ST\_Path** | required |  | Path to the encrypted resource file. |
 | encryptionalgorithm | **anyURI** | |   | Encryption algorithm used to encrypt the resource data. |
-| compression | **ST\_Compression** |  | none | Compression algorithm applied to content before is encrypted. |
+| compression | **ST\_Compression** |  | none | Compression algorithm applied to content before encryption. |
 | @anyAttribute | | | | |
 
 The \<resourcedata> element under a \<keystore> element contains the resource specific encryption information for an encrypted resource and the file path to the encrypted content file.
@@ -234,7 +234,7 @@ A consumer supporting the 3MF Secure Content Extension MUST support, at a minimu
 
 > AES-GCM [SP800-38D] is an authenticated encryption mechanism. It is equivalent to doing these two operations in one step - AES encryption followed by HMAC signing.
 
-> For the purposes of this specification, A-ES-GCM shall be used with a 96-bit Initialization Vector (IV) and a 128-bit Authentication Tag (T). The cipher text contains the IV first, followed by the encrypted octets and finally the Authentication tag. No padding should be used during encryption. During decryption the implementation should compare the authentication tag computed during decryption with the specified Authentication Tag and fail if they don't match. For details on the implementation of AES-GCM, see [SP800-38D].
+> For the purposes of this specification, A-ES-GCM shall be used with a 96-bit Initialization Vector (IV) and a 128-bit Authentication Tag (T). The cipher text contains the IV first, followed by the encrypted octets and finally the Authentication tag. No padding should be used during encryption. During decryption the implementation should compare the authentication tag computed during decryption with the specified Authentication Tag and fail if they don't match. For details on the implementation of AES-GCM, see the publication [SP800-38D](https://csrc.nist.gov/publications/detail/sp/800-38d/final).
 
 **compression** - Compression algorithm applied before encrypting the content to obtain a significant compression ratio.
 
@@ -284,7 +284,7 @@ For this specification, the only algorithm supported for key encryption is RSA O
 
 From https://www.w3.org/TR/xmlenc-core1/#sec-RSA-OAEP:
 
-> The RSAES-OAEP-ENCRYPT algorithm, as specified in RFC 3447 [PKCS1], has options that define the message digest function and mask generation function, as well as an optional PSourceAlgorithm parameter. Default values defined in RFC 3447 are SHA1 for the message digest and MGF1 with SHA1 for the mask generation function. Both the message digest and mask generation functions are used in the EME-OAEP-ENCODE operation as part of RSAES- OAEP-ENCRYPT. 
+> The RSAES-OAEP-ENCRYPT algorithm, as specified in RFC 3447 [PKCS1], has options that define the message digest function and mask generation function, as well as an optional PSourceAlgorithm parameter. Default values defined in RFC 3447 are SHA1 for the message digest and MGF1 with SHA1 for the mask generation function. Both the message digest and mask generation functions are used in the EME-OAEP-ENCODE operation as part of RSAES-OAEP-ENCRYPT. 
 
 > The http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p identifier defines the mask generation function as the fixed value of MGF1 with SHA1. In this case the optional xenc11:MGF element of the xenc:EncryptionMethod element MUST NOT be provided.
 
@@ -449,6 +449,9 @@ Specification for encrypting data and representing the result in XML. https://ww
 **W3C XML Signature Syntax and Processing Version 1.1**
 
 Specification for XML digital signature processing rules and syntax. http://www.w3.org/TR/xmldsig-core1/.
+
+**[SP800-38D]**
+M. Dworkin. NIST Special Publication 800-38D: Recommendation for Block Cipher Modes of Operation: Galois/Counter Mode (GCM) and GMAC. November 2007 URL: http://csrc.nist.gov/publications/nistpubs/800-38D/SP-800-38D.pdf
 
 For additional references See [the 3MF Core Specification references](https://github.com/3MFConsortium/spec_core/blob/1.2.3/3MF%20Core%20Specification.md#references).
 
