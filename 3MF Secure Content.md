@@ -13,7 +13,7 @@
 
 
 
-| **Version** | 0.86 |
+| **Version** | 0.87 |
 | --- | --- |
 | **Status** | Draft |
 
@@ -181,30 +181,17 @@ See the following example:
 
 Element **\<keyvalue>**
 
-Additional information about the public key used as Key Encryption Key MAY be provided using a \<keyvalue> element as defined in the XML digital signature specification (https://www.w3.org/TR/xmldsig-core1/#sec-KeyValue). The specific key to use MUST be identified using the \<ds:KeyValue> element containing the W3C XML formatted public key.
-
-##### Figure 2–1. ds:KeyValueType schema diagram
-
-![KeyInfoType schema design](images/2.1.1.ds-keyvalue.png)
-
-For the purposes of this specification, only the \<ds:RSAKeyValue> element is supported for identifying the customer key. Consumers MAY disregard any other element if present.
+Additional information about the public key used as Key Encryption Key MAY be provided using a \<keyvalue> element containing the public key in PEM format as in [RFC7468](https://tools.ietf.org/html/rfc7468#section-13).
 
 See the following example:
 
 ```xml
 <consumer consumerid='HP#MOP44B#SG5693454' keyid="KEK_xxx">
-  <keyvalue>
-    <ds:RSAKeyValue>
-      <ds:Modulus>
-xs1GwyPre7/knVd3CAO1pyk++yp/qmBz2TekgrehYTWU7hs8bUCeVQrL2O
-B+jm/AgjdPMohWHD/tLcJy35aZgVfPI3Oa3gmXxdoLZrfNRbnrCm3Xr1MR
-7wnhMyBt5XXyU/FiF46g5qJ2DUIUg7teoKDNUSAN81JTIoH0KC+rZBoO3t
-u9PR7H75K5G2eT6oUWkWKcZZU/4WNCDasNtizTe41Jy99BjrChww5r2ctq
-G8LvIv7UeeFaK1vhxGKaNH/7JvKJI9LbewWNtmb/nRzQg9xK3e0OhblbW+
-o6zg5pTw+n37fS7pkXK7lbRfUfaQmhoGy6ox4UWGmOgm8yPu8S4Q==
-      </ds:Modulus>
-      <ds:Exponent>AQAB<ds:Exponent>
-    </ds:RSAKeyValue>
+  <keyvalue>-----BEGIN PUBLIC KEY-----
+MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEn1LlwLN/KBYQRVH6HfIMTzfEqJOVztLe
+kLchp2hi78cCaMY81FBlYs8J9l7krc+M4aBeCGYFjba+hiXttJWPL7ydlE+5UG4U
+Nkn3Eos8EiZByi9DVsyfy9eejh+8AXgp
+-----END PUBLIC KEY-----
   </keyvalue>
 </consumer>
 ```
@@ -353,7 +340,6 @@ See [the 3MF Core Specification glossary](https://github.com/3MFConsortium/spec_
 <xs:schema xmlns="http://schemas.microsoft.com/3dmanufacturing/securecontent/2019/04" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xenc="http://www.w3.org/2001/04/xmlenc#" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" targetNamespace="http://schemas.microsoft.com/3dmanufacturing/securecontent/2019/04" elementFormDefault="unqualified" attributeFormDefault="unqualified" blockDefault="#all">
   <xs:import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="http://www.w3.org/2001/xml.xsd"/>
   <xs:import namespace="http://www.w3.org/2001/04/xmlenc#" schemaLocation="https://www.w3.org/TR/xmlenc-core1/xenc-schema.xsd"/>
-  <xs:import namespace="http://www.w3.org/2000/09/xmldsig#" schemaLocation="http://www.w3.org/TR/2002/REC-xmldsig-core-20020212/xmldsig-core-schema.xsd"/>
   <xs:annotation>
     <xs:documentation><![CDATA[   Schema notes: 
  
@@ -377,7 +363,7 @@ See [the 3MF Core Specification glossary](https://github.com/3MFConsortium/spec_
   </xs:complexType>
   <xs:complexType name="CT_Consumer">
     <xs:sequence>
-      <xs:element ref="keyvalue" minOccurs="0"/>
+      <xs:element name="keyvalue" type="xs:string"/>
       <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="2147483647"/>
     </xs:sequence>
     <xs:attribute name="consumerid" type="xs:string" use="required"/>
@@ -428,7 +414,6 @@ See [the 3MF Core Specification glossary](https://github.com/3MFConsortium/spec_
   <xs:element name="resourcedata" type="CT_ResourceData"/>
   <xs:element name="decryptright" type="CT_DecryptRight"/>
   <xs:element name="cipherdata" type="xenc:CipherData"/>
-  <xs:element name="keyvalue" type="ds:KeyValueType"/>
 </xs:schema>
 ```
 
@@ -448,9 +433,8 @@ Secure Content [http://schemas.microsoft.com/3dmanufacturing/2019/04/keystore](h
 
 Specification for encrypting data and representing the result in XML. https://www.w3.org/TR/xmlenc-core1/.
 
-**W3C XML Signature Syntax and Processing Version 1.1**
-
-Specification for XML digital signature processing rules and syntax. http://www.w3.org/TR/xmldsig-core1/.
+**[RFC7468]**
+IETF RFC7468 Textual Encodings of PKIX, PKCS, and CMS Structures, section 13: Textual Encoding of Subject Public Key Info. [https://tools.ietf.org/html/rfc7468#section-13](https://tools.ietf.org/html/rfc7468#section-13)
 
 **[SP800-38D]**
 M. Dworkin. NIST Special Publication 800-38D: Recommendation for Block Cipher Modes of Operation: Galois/Counter Mode (GCM) and GMAC. November 2007 URL: http://csrc.nist.gov/publications/nistpubs/800-38D/SP-800-38D.pdf
