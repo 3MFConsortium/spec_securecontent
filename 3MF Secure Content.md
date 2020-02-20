@@ -222,24 +222,19 @@ Example of a \<resourcedata> element for an encrypted resource that can be acces
 
 ```xml
 <resourcedata path="/3D/model_obj1.model" compression="deflate" keyuuid="cb9b46cd-c5be-4f58-b2e3-69edb44ff5fe">
-  <cekparams>
-    encryptionalgorithm="http://www.w3.org/2009/xmlenc11#aes256-gcm">
+  <cekparams encryptionalgorithm="http://www.w3.org/2009/xmlenc11#aes256-gcm">
     <iv><!-- base64(Initialization Vector) --></iv>
     <tag><!-- base64(Authentication Tag) --></tag>
     <aad><!-- base64(Additional Authenticated Data) --></aad>
   </cekparams>
-  <decryptright consumerindex="0"
-    <kekparams>
-      encryptionalgorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p">
-    </kekparams>
+  <decryptright consumerindex="0">
+    <kekparams encryptionalgorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p"/>
      <cipherdata>
       <xenc:CipherValue><!-- base64(RSA2048_OAEP encrypted Content Encryption Key) --></xenc:CipherValue>
     </xenc:CipherData>
   </decryptright>
-  <decryptright consumerindex="1"
-    <kekparams>
-      encryptionalgorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p">
-    </kekparams>
+  <decryptright consumerindex="1">
+    <kekparams encryptionalgorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p"/>
     <cipherdata>
       <xenc:CipherValue><!-- base64(RSA2048_OAEP encrypted Content Encryption Key) --></xenc:CipherValue>
     </xenc:CipherData>
@@ -275,7 +270,7 @@ A consumer supporting the 3MF Secure Content Extension MUST support, at a minimu
 
 **\<aad>** - The Additional Authenticated Data \<aad> element contains the additional authenticated data for an encrypted resource.
 
-> For the purposes of this specification, AES-GCM MUST be used with a 96-bit Initialization Vector (IV), 128-bit Authentication Tag (T) and it MAY contain an optional Additional Authenticated Data (AAD). The cipher text is stored in the file path defined in the parent \<resourcedata> element with the cypher file format defined in [Appendix D. 3MF Cipher File Format](#appendix-d-3mf-cipher-file-format).
+> For the purposes of this specification, AES-GCM SHOULD be used with a 96-bit Initialization Vector (IV), 128-bit Authentication Tag (T) and it MAY contain an optional Additional Authenticated Data (AAD). The cipher text is stored in the file path defined in the parent \<resourcedata> element with the cypher file format defined in [Appendix D. 3MF Cipher File Format](#appendix-d-3mf-cipher-file-format).
 
 > During decryption the implementation should compare the authentication tag computed during decryption with the specified Authentication Tag and fail if they don't match. For details on the implementation of AES-GCM, see the publication [SP800-38D](https://csrc.nist.gov/publications/detail/sp/800-38d/final).
 
@@ -284,8 +279,7 @@ A consumer supporting the 3MF Secure Content Extension MUST support, at a minimu
 Example of a \<cekparams> element for an encrypted resource that can be accessed by two different consumers:
 
 ```xml
-<cekparams>
-  encryptionalgorithm="http://www.w3.org/2009/xmlenc11#aes256-gcm">
+<cekparams encryptionalgorithm="http://www.w3.org/2009/xmlenc11#aes256-gcm">
   <iv><!-- base64(Initialization Vector) --></iv>
   <tag><!-- base64(Authentication Tag) --></tag>
   <aad><!-- base64(Additional Authenticated Data) --></aad>
@@ -351,18 +345,15 @@ From https://www.w3.org/TR/xmlenc-core1/#sec-RSA-OAEP:
 An example of an RSA-OAEP element with rsa-oaep-mgf1p:
 
 ```xml
-<kekparams>
-  encryptionalgorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p">
-</kekparams>
+<kekparams encryptionalgorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p"/>
 ```
 An example of an RSA-OAEP element with MGF1 and SHA256 (recommended):
 
 ```xml
-<kekparams>
+<kekparams
   encryptionalgorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep"
   mgfalgorithm="http://www.w3.org/2009/xmlenc11#mgf1sha256"
-  digestmethod="http://www.w3.org/2001/04/xmlenc#sha256">
-</kekparams>
+  digestmethod="http://www.w3.org/2001/04/xmlenc#sha256" />
 ```
 
 > The CipherValue for an RSA-OAEP encrypted key is the base64 encoding of the octet string computed as per RFC 2437 [PKCS1, section 7.1.1: Encryption operation](). As described in the EME-OAEP-ENCODE function RFC 2437 [PKCS1, section 9.1.1.1], the value input to the key transport function is calculated using the message digest function and string specified in the "digestmethod" attribute and using the mask generator function specified in RFC 2437. The desired output length for EME-OAEP-ENCODE is one byte shorter than the RSA modulus.
