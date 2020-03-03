@@ -4,7 +4,7 @@
 ## Specification & Reference Guide
 
 
-| **Version** | 0.89 |
+| **Version** | 0.90 |
 | --- | --- |
 | **Status** | Draft |
 
@@ -22,7 +22,7 @@
     + [1.3 Package Organization and OPC Compliance](#13-package-organization-and-opc-compliance)
   * [Chapter 2. Key Store](#chapter-2-key-store)
       - [2.1 Consumer](#21-consumer)
-      - [2.2 Resource Data](#22-resource-data)
+      - [2.2 Resource Data Group](#22-resource-data-group)
   * [Chapter 3. OPC Relation and Content Types](#chapter-3-opc-relation-and-content-types)
     + [3.1 Content Types](#31-content-types)
     + [3.2 Relation Files](#32-relation-files)
@@ -72,6 +72,8 @@ This extension describes the encryption mechanism to protect the 3MF content fil
 
 In order to allow for the use of 3MF in highly secure printing environments, several additions are needed to efficiently support confidentiality of specific content in the 3MF package, providing a 3MF producer with the capability to control which consumers have access to the confidential content.
 
+While the 3MF Secure Content Extension provides a mechanism for controlling which consumers may have decrypt rights to specific confidential content, it also might be used in conjuction with external Digital Rights Management solution which might provide the decrypt rights to the confidential content.
+
 A consumer not supporting the 3MF Secure Content Extension MAY be able to consume the 3MF with this extension, but it may miss any encrypted OPC part.
 
 In order to avoid data loss while parsing, a 3MF package which uses referenced objects SHOULD enlist the Secure Content Extension as “required extension”, as defined in the core specification. However, if the Secure Content Extension is not enlisted as required, any consumer which does not support the Secure Content Extension will be able to access the unencrypted OPC parts.
@@ -84,15 +86,19 @@ A producer MAY add a MustPreserve relashionship to the Key Store OPC part or any
 
 The encryption model used is a 'two-level' Key Encryption Key - Content Encryption Key (KEK-CEK) wrapping scheme:
 
-- Each confidential resource is encrypted using an efficient symmetric Content Encryption Method, with a randomly generated symmetric Content Encryption Key (CEK). There may be several resources in a 3MF package that requires confidentiality, so different CEKs MUST be provided for each one of them. Consumers MUST support, at a minimum the AES256 GCM (Gaulois Counter Mode).
+- Each confidential resource is encrypted using an efficient symmetric Content Encryption Method, with a randomly generated symmetric Content Encryption Key (CEK). There may be several resources in a 3MF package that requires confidentiality, so different CEKs MUST be provided for each one of them. Consumers MUST support, at a minimum, the AES256 GCM (Gaulois Counter Mode).
 
-- The CEK for each one of the confidential resources may be wrapped with one or several Key Encryption Keys (KEK), using Key Encryption Methods that ensure that only the intended consumers can decrypt and use the CEK. This means that the consumers must have an RSA2048 asymmetric private decryption key, and the corresponding public key must be made available to the producer to encrypt the CEK. Cunsumer MUST support, at a minimum, the asymmetric RSA2048 OAEP Key Encryption Method.
+- The CEK for each one of the confidential resources may be wrapped with one or several Key Encryption Keys (KEK), using wrapping methods that ensure that only the intended consumers can decrypt and use the CEK. This means that the consumers must have available the decryption key.
+
+- When the wrapping method is an RSA2048 asymmetric private decryption key, and the corresponding public key must be made available to the producer to encrypt the CEK. Consumer MUST support, at a minimum, the asymmetric RSA2048 OAEP Key Encryption Method, based on public and private keys scheme.
 
 -	There could be several consumers for the same 3MF file and at the same time some consumers might have more than a pair of public and private keys, e.g. for different job types. To provide simultaneous access to all authorized parties, the CEK for a confidential resource may be encrypted several times, one for each different potential consumer.
 
+- Alternative wrapping schemes might also be supported by a consumer, for example using a symmetric KEK which might be delived to the consumer(s) by any extenal mechanism to the 3MF file.
+
 The KEK-CEK wrapping scheme provides efficiency because the (probably large) data in a confidential resource is encrypted/decrypted only once using an efficient symmetric encryption algorithm and KEK approach provides flexibility in controlling who can access the confidential data, by allowing encrypting the CEK with different KEKs.
 
-The mechanism for storing the CEK in the 3MF is optional. It provides a mean to communicate the CEK for eack part. However, the CEKs might be transferred to the consumer by any other mean, externally to the 3MF file.
+The mechanism for storing the CEK in the 3MF is optional. It provides a mean to communicate the CEK for eack part. However, the CEKs might be transferred to the consumer by any other means, externally to the 3MF file.
 
 ## 1.2 Parts Relationships
 
@@ -113,13 +119,13 @@ Only non-root OPC parts MAY be encrypted. Root OPC parts and parts relationships
 
 A new 3MF resource, the Key Store, is defined to support content encryption. The \<keystore> element stores the encryption information for the different confidential resources in the package.
 
-For each confidential resource, the Key Store contains:
+For each confidential resource, the Key Store may contain:
 
-- Information on how the content is encrypted: the Content Encryption Method, and other information relevant to enable content decryption.
+- Information on how the content is encrypted: the wrapping method, and other information relevant to enable content decryption.
 
-- One CEK encrypted using a KEKs wrapping, with the corresponding information about the Key Encryption Method used, for each one of the consumers authorized to access confidential content.
+- One CEK wrapped using a KEK, with the corresponding information about the wrapping method used, for each one of the consumers authorized to decrypt confidential content.
 
-A consumer supporting the 3MF Secure Content Extension MUST support, at a minimum, the RSA2048 OAEP Key Encryption Algorithm.
+A consumer supporting the 3MF Secure Content Extension MUST support, at a minimum, the RSA2048 OAEP wrapping method. Other wrapping methods, for example using symmetric keys, might also be supported by a consumer.
 
 ##### Figure 1–1. A typical 3MF Secure Content Document with multiple encrypted model streams
 ![OPC organization](images/1.1.opc_organization.png)
@@ -153,19 +159,21 @@ Element **\<consumer>**
 
 | Name   | Type   | Use   | Default   | Annotation |
 | --- | --- | --- | --- | --- |
-| consumerid | **string** | required |   | ID of the target consumer. |
+| consumerid | **string** | |   | ID of the target consumer. |
 | keyid | **string** | |   | Optional key identifier. |
 | @anyAttribute | | | | |
 
 The \<consumer> element under a \<keystore> element contains the target consumer specific information. When a \<keystore> element constains more than one consumer it means that there is more than a single recipient that could decrypt the content.
 
-**consumerid** - The consumer ID attribute to be referenced from the \<decryptright> elements from a \<resourcedata> element to specify to which \<consumer> is intended the encrypted content.
+**consumerid** - On asymetric wrapping schemes, the consumer ID attribute to be referenced from the \<decryptright> elements from a \<resourcedata> element to specify to which \<consumer> is intended the encrypted content.
 
 A consumer MUST be identified by "consumerid", an attribute in \<consumer> element, where consumerid is a human readable unique identifier (Alphanumeric). Each consumer is expected to have a unique id, which is known to both producer and consumer.
 
+On symmetric wrapping schemes, the target consumer might not be defined in the 3MF document, but in an extenal mechanism to the 3MF Secure Content Extension.
+
 **keyid** - The optional alphanumeric key identifier attribute for identifying the consumer's Key Encryption Key (KEK), which it is used for wrapping the content encryption keys targeted to this consumer.
 
-It is possible that a consumer has different encryption key pairs. In this case, additional information about the specific key pair used as Key Encryption Key is needed. This information MAY be provided by specifying the key identification.
+It is possible that a consumer has different encryption keys. In this case, additional information about the specific key pair used as Key Encryption Key is needed. This information MAY be provided by specifying the key identification.
 
 See the following example:
 
@@ -178,7 +186,7 @@ See the following example:
 
 Element **\<keyvalue>**
 
-Additional information about the public key used as Key Encryption Key MAY be provided using a \<keyvalue> element containing the public key in PEM format as in [RFC7468](https://tools.ietf.org/html/rfc7468#section-13).
+In asymmetric wrapping schemes, additional information about the public key used as Key Encryption Key MAY be provided using a \<keyvalue> element containing the public key in PEM format as in [RFC7468](https://tools.ietf.org/html/rfc7468#section-13).
 
 See the following example:
 
@@ -193,64 +201,79 @@ Nkn3Eos8EiZByi9DVsyfy9eejh+8AXgp
 </consumer>
 ```
 
-## 2.2 Resource Data
+## 2.2 Resource Data Group
+
+Element **\<resourcedatagroup>**
+
+![Resource Data XML structure](images/2.2.resourcedatagroup.png)
+
+| Name   | Type   | Use   | Default   | Annotation |
+| --- | --- | --- | --- | --- |
+| keyuuid | **ST\_UUID** | required |  | UUID that identifies the CEK. |
+| @anyAttribute | | | | |
+
+The \<resourcedatagroup> element under a \<keystore> element contains the resource specific encryption information for a set of encrypted resources which are encrypted using the same Content Encryption Key (CEK).
+
+**keyuuid** - UUID that identifies the Content Encryption Key (CEK). This UUID MAY be used to identify the key in external systems, for example in a Digital Rights Management (DRM) system.
+
+Example of a \<resourcedata> element for a set of encrypted resources that can be accessed by two different consumers:
+
+```xml
+<resourcedatagroup keyuuid="cb9b46cd-c5be-4f58-b2e3-69edb44ff5fe">
+  <decryptright consumerindex="0" wrappingalgorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p">
+    <cipherdata>
+      <xenc:CipherValue><!-- base64(RSA2048_OAEP encrypted Content Encryption Key) --></xenc:CipherValue>
+    </cipherdata>
+  </decryptright>
+  <decryptright consumerindex="1" wrappingalgorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p">
+    <cipherdata>
+      <xenc:CipherValue><!-- base64(RSA2048_OAEP encrypted Content Encryption Key) --></xenc:CipherValue>
+    </cipherdata>
+  </decryptright>
+  <resourcedata path="path to encrypted file1 in package">
+    <cekparams encryptionalgorithm="http://www.w3.org/2009/xmlenc11#aes256-gcm" compression="deflate">
+      <iv><!-- base64(Initialization Vector) --></iv>
+      <tag><!-- base64(Authentication Tag) --></tag>
+      <aad><!-- base64(Additional Authenticated Data) --></aad>
+    </cekparams>
+  </resourcedata>
+  <resourcedata path="path to encrypted file2 in package">
+    <cekparams encryptionalgorithm="http://www.w3.org/2009/xmlenc11#aes256-gcm" compression="deflate">
+      <iv><!-- base64(Initialization Vector) --></iv>
+      <tag><!-- base64(Authentication Tag) --></tag>
+      <aad><!-- base64(Additional Authenticated Data) --></aad>
+    </cekparams>
+  </resourcedata>
+</resourcedatagroup>
+```
+
+## 2.2.1 Resource Data
 
 Element **\<resourcedata>**
 
-![Resource Data XML structure](images/2.2.resourcedata.png)
+![Resource Data XML structure](images/2.2.1.resourcedata.png)
 
 | Name   | Type   | Use   | Default   | Annotation |
 | --- | --- | --- | --- | --- |
 | path | **ST\_Path** | required |  | Path to the encrypted resource file. |
-| compression | **ST\_Compression** |  | none | Compression algorithm applied to content before encryption. |
-| keyuuid | **ST\_UUID** | required |  | UUID that identifies the CEK. |
 | @anyAttribute | | | | |
 
-The \<resourcedata> element under a \<keystore> element contains the resource specific encryption information for an encrypted resource and the file path to the encrypted content file.
+The \<resourcedata> element under a \<resourcedatagroup> element contains the resource specific encryption information for an encrypted resource and the file path to the encrypted content file.
 
 **path** - Path to the encrypted file in the OPC package. The path MUST be treated as a hash map to identify encrypted files referenced from any XML model file by their path attribute defined in 3MF extensions. A given file path must be unique; it MUST NOT show up in more than one \<resourcedata> element. All encrypted files referenced by a resource data element MUST have a EncryptedFile relationship. See [3.3 Encrypted File Relationship](#33-encrypted-file-relationship).
 
-When a model resource path is found in a \<resourcedata> element, the content of that file MUST be encrypted.
+When an OPC part path is found in a \<resourcedata> element, the content of that file MUST be encrypted.
 
-**compression** - Compression algorithm applied before encrypting the content to obtain a significant compression ratio.
-
-A producer MAY specify a compression “deflate” so the content is first compressed and then encrypted. When compression is "deflate", a consumer MUST first decrypt and then decompress the content.
-
-**keyuuid** - UUID that identifies the Content Encryption Key (CEK). This UUID MAY be used to identify the key in external systems.
-
-Example of a \<resourcedata> element for an encrypted resource that can be accessed by two different consumers:
-
-```xml
-<resourcedata path="/3D/model_obj1.model" compression="deflate" keyuuid="cb9b46cd-c5be-4f58-b2e3-69edb44ff5fe">
-  <cekparams encryptionalgorithm="http://www.w3.org/2009/xmlenc11#aes256-gcm">
-    <iv><!-- base64(Initialization Vector) --></iv>
-    <tag><!-- base64(Authentication Tag) --></tag>
-    <aad><!-- base64(Additional Authenticated Data) --></aad>
-  </cekparams>
-  <decryptright consumerindex="0">
-    <kekparams encryptionalgorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p"/>
-     <cipherdata>
-      <xenc:CipherValue><!-- base64(RSA2048_OAEP encrypted Content Encryption Key) --></xenc:CipherValue>
-    </xenc:CipherData>
-  </decryptright>
-  <decryptright consumerindex="1">
-    <kekparams encryptionalgorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p"/>
-    <cipherdata>
-      <xenc:CipherValue><!-- base64(RSA2048_OAEP encrypted Content Encryption Key) --></xenc:CipherValue>
-    </xenc:CipherData>
-  </decryptright>
-</resourcedata>
-```
-
-### 2.2.1 CEK Params
+### 2.2.1.1 CEK Params
 
 Element **\<cekparams>**
 
-![CEK Params XML structure](images/2.2.1.cekparams.png)
+![CEK Params XML structure](images/2.2.1.1.cekparams.png)
 
 | Name   | Type   | Use   | Default   | Annotation |
 | --- | --- | --- | --- | --- |
-| encryptionalgorithm | **anyURI** | |   | Encryption algorithm used to encrypt the resource data. |
+| encryptionalgorithm | **anyURI** | required | | Encryption algorithm used to encrypt the resource data. |
+| compression | **ST\_Compression** |  | none | Compression algorithm applied to content before encryption. |
 | iv | **base64Binary** |  |  | Initialization Vector. |
 | tag | **base64Binary** |  |  | Authentication Tag. |
 | aad | **base64Binary** |  |  | Additional Authenticated Data. |
@@ -264,6 +287,10 @@ A consumer supporting the 3MF Secure Content Extension MUST support, at a minimu
 
 > AES-GCM [SP800-38D](https://csrc.nist.gov/publications/detail/sp/800-38d/final) is an authenticated encryption mechanism. It is equivalent to doing these two operations in one step - AES encryption followed by HMAC signing.
 
+**compression** - Compression algorithm applied before encrypting the content to obtain a significant compression ratio, specially on text files.
+
+A producer MAY specify a compression “deflate” so the content is first compressed and then encrypted. When compression is "deflate", a consumer MUST first decrypt and then decompress the content.
+
 **\<iv>** - The Inicialization Vector \<iv> element is essentially a nonce, i.e, a value that is unique within the specified context, which determines an invocation of the authenticated encryption function on the input data to be protected. 
 
 **\<tag>** - The Authentication Tag \<tag> element is a cryptographic checksum on data that is designed to reveal both accidental errors and the intentional modification of the data. 
@@ -274,17 +301,7 @@ A consumer supporting the 3MF Secure Content Extension MUST support, at a minimu
 
 > During decryption the implementation should compare the authentication tag computed during decryption with the specified Authentication Tag and fail if they don't match. For details on the implementation of AES-GCM, see the publication [SP800-38D](https://csrc.nist.gov/publications/detail/sp/800-38d/final).
 
->**Note:** For enhanced security, every time a file is encrypted a new Initialization Vector (IV) SHOULD be generated. See [SP800-38D](https://csrc.nist.gov/publications/detail/sp/800-38d/final) section 8: Uniqueness Requirement on IVs and Keys .
-
-Example of a \<cekparams> element for an encrypted resource that can be accessed by two different consumers:
-
-```xml
-<cekparams encryptionalgorithm="http://www.w3.org/2009/xmlenc11#aes256-gcm">
-  <iv><!-- base64(Initialization Vector) --></iv>
-  <tag><!-- base64(Authentication Tag) --></tag>
-  <aad><!-- base64(Additional Authenticated Data) --></aad>
-</cekparams>
-```
+>**Note:** For enhanced security, every time a file is encrypted a new Initialization Vector (IV) SHOULD be generated. See [SP800-38D](https://csrc.nist.gov/publications/detail/sp/800-38d/final) Section 8: Uniqueness Requirement on IVs and Keys.
 
 ### 2.2.2 Decrypt Right
 
@@ -294,12 +311,12 @@ Element **\<decryptright>**
 
 | Name   | Type   | Use   | Default   | Annotation |
 | --- | --- | --- | --- | --- |
-| consumerindex | **ST\_ResourceIndex** | required | | Zero-based index to the \<customer> element containing the keys to decrypt the resource file |
+| consumerindex | **ST\_ResourceIndex** | required | | Zero-based index to the \<customer> element containing the keys to unwrap the Content Encryption Keys |
 | @anyAttribute | | | | |
 
-The \<decryptright> element under a \<resourcedata> element contains the consumer specific information to decrypt the content file for a specific consumer. Each \<decryptright> element contains the Content Encryption Key (CEK) wrapped with the consumer's public Key Encryption Key (KEK). 
+The \<decryptright> element under a \<resourcedata> element contains the consumer specific information to unwrap the Content Encryption Keys for a specific consumer. Each \<decryptright> element contains the Content Encryption Key (CEK) wrapped with the Key Encryption Key (KEK). 
 
-**consumerindex** - Index to the \<consumer> element in the Key Store to select the Customer to which the decryption key is targeted.
+**consumerindex** - Index to the \<consumer> element in the Key Store to select the Customer to which the wrapping key is targeted.
 
 ### 2.2.2.1 KEK Params
 
@@ -309,14 +326,14 @@ Element **\<kekparams>**
 
 | Name   | Type   | Use   | Default   | Annotation |
 | --- | --- | --- | --- | --- |
-| encryptionalgorithm | **anyURI** | |   | Encryption algorithm. |
+| wrappingalgorithm | **anyURI** | required |   | Encryption algorithm. |
 | mgfalgorithm | **anyURI** | |   | Mask generation function. |
 | digestmethod | **anyURI** | |   | Message digest method. |
 | @anyAttribute | | | | |
 
-The \<kekparams> element under a \<decryptright> element specifies the encryption method used to wrap the CEK using the consumer's Key Encryption Key (KEK).
+The \<kekparams> element under a \<decryptright> element specifies the wrapping method used to wrap the CEK using a Key Encryption Key (KEK).
 
-**encryptionalgorithm** - Encryption algorithm used to wrap the Content Encryption Key (CEK).
+**wrappingalgorithm** - Wrapping algorithm used to wrap the Content Encryption Key (CEK).
 
 **mgfalgorithm** - Mask generation function used to wrap the Content Encryption Key (CEK).
 
@@ -358,7 +375,9 @@ An example of an RSA-OAEP element with MGF1 and SHA256 (recommended):
 
 > The CipherValue for an RSA-OAEP encrypted key is the base64 encoding of the octet string computed as per RFC 2437 [PKCS1, section 7.1.1: Encryption operation](). As described in the EME-OAEP-ENCODE function RFC 2437 [PKCS1, section 9.1.1.1], the value input to the key transport function is calculated using the message digest function and string specified in the "digestmethod" attribute and using the mask generator function specified in RFC 2437. The desired output length for EME-OAEP-ENCODE is one byte shorter than the RSA modulus.
 
-A consumer supporting the 3MF Secure Content Extension MUST support the RSA OAEP with MFG1 with either SHA1 or SHA256 digest methods, as defined in https://www.w3.org/TR/xmlenc-core1/#sec-Alg-MessageDigest. Other algorithms, mask generation or disgest methods MAY be supported by a consumer as far the producer and the consumer are able to negotiate them outside of the 3MF Secure Content specification.
+A consumer supporting the 3MF Secure Content Extension MUST support the RSA OAEP with MFG1 with either SHA1 or SHA256 digest methods, as defined in https://www.w3.org/TR/xmlenc-core1/#sec-Alg-MessageDigest.
+
+Other algorithms, mask generation or disgest methods MAY be supported by a consumer as far the producer and the consumer are able to negotiate them outside of the 3MF Secure Content specification.
 
 **Note:** For enhanced security, it is recommended to use the SHA256 digest method and the MFG1 with SHA256 mask generation function.
 
@@ -366,7 +385,7 @@ A consumer supporting the 3MF Secure Content Extension MUST support the RSA OAEP
 
 Element **\<cipherdata>**
 
-The \<cipherdata> element under the \<decryptright> element contains the public key to decrypt the content file, which is encrypted for a specific consumer, granting its decryption rights.
+The \<cipherdata> element under the \<decryptright> element contains the CEK to decrypt the content file, which is wrapped for a specific consumer using the KEK, granting its decryption rights.
 
 ##### Figure 2–2. xenc:CipherData schema diagram
 
@@ -460,7 +479,7 @@ See [the 3MF Core Specification glossary](https://github.com/3MFConsortium/spec_
   <xs:complexType name="CT_KeyStore">
     <xs:sequence>
       <xs:element ref="consumer" minOccurs="0" maxOccurs="2147483647"/>
-      <xs:element ref="resourcedata" minOccurs="0" maxOccurs="2147483647"/>
+      <xs:element ref="resourcedatagroup" minOccurs="0" maxOccurs="2147483647"/>
       <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="2147483647"/>
     </xs:sequence>
     <xs:attribute name="UUID" type="ST_UUID" use="required"/>
@@ -471,8 +490,17 @@ See [the 3MF Core Specification glossary](https://github.com/3MFConsortium/spec_
       <xs:element name="keyvalue" type="xs:string"/>
       <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="2147483647"/>
     </xs:sequence>
-    <xs:attribute name="consumerid" type="xs:string" use="required"/>
+    <xs:attribute name="consumerid" type="xs:string"/>
     <xs:attribute name="keyid" type="xs:string"/>
+    <xs:anyAttribute namespace="##other" processContents="lax"/>
+  </xs:complexType>
+  <xs:complexType name="CT_ResourceDataGroup">
+    <xs:sequence>
+      <xs:element ref="decryptright" minOccurs="0" maxOccurs="2147483647"/>
+      <xs:element ref="resourcedata" minOccurs="0" maxOccurs="2147483647"/>
+      <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="2147483647"/>
+    </xs:sequence>
+    <xs:attribute name="keyuuid" type="ST_UUID" use="required"/>
     <xs:anyAttribute namespace="##other" processContents="lax"/>
   </xs:complexType>
   <xs:complexType name="CT_ResourceData">
@@ -482,8 +510,6 @@ See [the 3MF Core Specification glossary](https://github.com/3MFConsortium/spec_
       <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="2147483647"/>
     </xs:sequence>
     <xs:attribute name="path" type="ST_Path" use="required"/>
-    <xs:attribute name="compression" type="ST_Compression" default="none"/>
-    <xs:attribute name="keyuuid" type="ST_UUID" use="required"/>
     <xs:anyAttribute namespace="##other" processContents="lax"/>
   </xs:complexType>
   <xs:complexType name="CT_DecryptRight">
@@ -503,13 +529,14 @@ See [the 3MF Core Specification glossary](https://github.com/3MFConsortium/spec_
       <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="2147483647"/>
     </xs:sequence>
     <xs:attribute name='encryptionalgorithm' type='xs:anyURI' use="required"/>
+    <xs:attribute name="compression" type="ST_Compression" default="none"/>
     <xs:anyAttribute namespace="##other" processContents="lax"/>
   </xs:complexType>
   <xs:complexType name="CT_KEKParams">
     <xs:sequence>
       <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="2147483647"/>
     </xs:sequence>
-    <xs:attribute name='encryptionalgorithm' type='xs:anyURI' use="required"/>
+    <xs:attribute name='wrappingalgorithm' type='xs:anyURI' use="required"/>
     <xs:attribute name='mgfalgorithm' type='xs:anyURI'/>
     <xs:attribute name='digestmethod' type='xs:anyURI'/>
     <xs:anyAttribute namespace="##other" processContents="lax"/>
@@ -536,6 +563,7 @@ See [the 3MF Core Specification glossary](https://github.com/3MFConsortium/spec_
   <!-- Elements -->
   <xs:element name="keystore" type="CT_KeyStore"/>
   <xs:element name="consumer" type="CT_Consumer"/>
+  <xs:element name="resourcedatagroup" type="CT_ResourceDataGroup"/>
   <xs:element name="resourcedata" type="CT_ResourceData"/>
   <xs:element name="decryptright" type="CT_DecryptRight"/>
   <xs:element name="cekparams" type="CT_CEKParams"/>
@@ -562,16 +590,20 @@ The 3MF Secure Extension defines a file format to specify how the encrypted file
 
 The file format is easily identifiable by software by the '%3McF' magic number.
 
-The following take defines the 3MF cipher file format.
+The following take defines the 3MF Cipher File format.
 
 | Octets | Value| Description |
 | --- | --- | --- |
-| 0-4 | '%3McF' |
+| 0 - 4 | '%3McF' | Magic number|
 | 5 | 0x00 | Version |
-| 6-7 | 0x0000 | Header length |
-| 8-eof | | Crypto content |
+| 6 - 7 | | Header length, since octet 0. Minimum value 16. |
+| 8 - 15 | | Uncompressed size (64 bit unsigned int) |
+| 16 - (Header length - 1) | | Reserved Header Data. |
+| (Header length) - EOF | | Crypto content |
 
-For the purposes of this specification only the version 0 with no header is supported. The header length is set to 0 for future extendability.
+For the purposes of this specification only the version 0 is supported.
+
+All the numeric values MUST be stored in Little Endian format.
 
 # References
 
