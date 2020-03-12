@@ -4,7 +4,7 @@
 ## Specification & Reference Guide
 
 
-| **Version** | 0.91 |
+| **Version** | 0.92 |
 | --- | --- |
 | **Status** | Draft |
 
@@ -595,8 +595,8 @@ The following take defines the 3MF Cipher File format.
 | --- | --- | --- |
 | 0 - 4 | '%3McF' | Magic number|
 | 5 | 0x00 | Version |
-| 6 - 7 | | Header length since octet 0. Minimum value 8. |
-| 8 - (Header length - 1) | | Reserved Header Data. |
+| 6 - 9 | | Header length since octet 0. Minimum value 10. |
+| 10 - (Header length - 1) | | Reserved Header Data. |
 | (Header length) - EOF | | Crypto content |
 
 For the purposes of this specification only the version 0 is supported.
