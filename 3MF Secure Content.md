@@ -4,7 +4,7 @@
 ## Specification & Reference Guide
 
 
-| **Version** | 0.92 |
+| **Version** | 0.93 |
 | --- | --- |
 | **Status** | Draft |
 
@@ -362,13 +362,13 @@ From https://www.w3.org/TR/xmlenc-core1/#sec-RSA-OAEP:
 An example of an RSA-OAEP element with rsa-oaep-mgf1p:
 
 ```xml
-<kekparams encryptionalgorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p"/>
+<kekparams wrappingalgorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p"/>
 ```
 An example of an RSA-OAEP element with MGF1 and SHA256 (recommended):
 
 ```xml
 <kekparams
-  encryptionalgorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep"
+  wrappingalgorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep"
   mgfalgorithm="http://www.w3.org/2009/xmlenc11#mgf1sha256"
   digestmethod="http://www.w3.org/2001/04/xmlenc#sha256" />
 ```
@@ -594,9 +594,11 @@ The following take defines the 3MF Cipher File format.
 | Octets | Value| Description |
 | --- | --- | --- |
 | 0 - 4 | '%3McF' | Magic number|
-| 5 | 0x00 | Version |
-| 6 - 9 | | Header length since octet 0. Minimum value 10. |
-| 10 - (Header length - 1) | | Reserved Header Data. |
+| 5 | 0x00 | Version major |
+| 6 | 0x00 | Version minor |
+| 7 | 0x00 | Unused. Must be 0x00 |
+| 8 - 11 | | Header length since octet 0. Minimum value 12. |
+| 12 - (Header length - 1) | | Reserved Header Data. |
 | (Header length) - EOF | | Crypto content |
 
 For the purposes of this specification only the version 0 is supported.
@@ -623,4 +625,4 @@ J. Jonsson and B. Kaliski. Public-Key Cryptography Standards (PKCS) #1: RSA Cryp
 
 For additional references See [the 3MF Core Specification references](https://github.com/3MFConsortium/spec_core/blob/1.2.3/3MF%20Core%20Specification.md#references).
 
-Copyright 3MF Consortium 2019.
+Copyright 3MF Consortium 2020.
