@@ -216,16 +216,18 @@ The \<resourcedatagroup> element under a \<keystore> element contains the resour
 
 **keyuuid** - UUID that identifies the Content Encryption Key (CEK). This UUID MAY be used to identify the key in external systems, for example in a Digital Rights Management (DRM) system.
 
-Example of a \<resourcedata> element for a set of encrypted resources that can be accessed by two different consumers:
+Example of a \<resourcedatagroup> element for a set of encrypted resources that can be accessed by two different consumers:
 
 ```xml
 <resourcedatagroup keyuuid="cb9b46cd-c5be-4f58-b2e3-69edb44ff5fe">
-  <accessright consumerindex="0" wrappingalgorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p">
+  <accessright consumerindex="0">
+    <kekparams wrappingalgorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p"/>
     <cipherdata>
       <xenc:CipherValue><!-- base64(RSA2048_OAEP encrypted Content Encryption Key) --></xenc:CipherValue>
     </cipherdata>
   </accessright>
-  <accessright consumerindex="1" wrappingalgorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p">
+  <accessright consumerindex="1">
+    <kekparams wrappingalgorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p"/>
     <cipherdata>
       <xenc:CipherValue><!-- base64(RSA2048_OAEP encrypted Content Encryption Key) --></xenc:CipherValue>
     </cipherdata>
@@ -260,7 +262,7 @@ Element **\<resourcedata>**
 
 The \<resourcedata> element under a \<resourcedatagroup> element contains the resource specific encryption information for an encrypted resource and the file path to the encrypted content file.
 
-**path** - Path to the encrypted file in the OPC package. The path MUST be treated as a hash map to identify encrypted files referenced from any XML model file by their path attribute defined in 3MF extensions. A given file path must be unique; it MUST NOT show up in more than one \<resourcedata> element. All encrypted files referenced by a resource data element MUST have a EncryptedFile relationship. See [3.3 Encrypted File Relationship](#33-encrypted-file-relationship).
+**path** - Path to the encrypted file in the OPC package. The path MUST be treated as a hash map to identify encrypted files referenced from any XML model file by their path attribute defined in 3MF extensions. A given file path must be unique; it MUST NOT show up in more than one \<resourcedata> element across the \<keystore>. All encrypted files referenced by a resource data element MUST have a EncryptedFile relationship. See [3.3 Encrypted File Relationship](#33-encrypted-file-relationship).
 
 When an OPC part path is found in a \<resourcedata> element, the content of that file MUST be encrypted.
 
@@ -487,7 +489,7 @@ See [the 3MF Core Specification glossary](https://github.com/3MFConsortium/spec_
   </xs:complexType>
   <xs:complexType name="CT_Consumer">
     <xs:sequence>
-      <xs:element name="keyvalue" type="xs:string"/>
+      <xs:element name="keyvalue" type="xs:string" minOccurs="0"/>
       <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="2147483647"/>
     </xs:sequence>
     <xs:attribute name="consumerid" type="xs:string"/>
