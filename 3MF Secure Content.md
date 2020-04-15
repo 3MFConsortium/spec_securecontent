@@ -4,7 +4,7 @@
 ## Specification & Reference Guide
 
 
-| **Version** | 0.93 |
+| **Version** | 1.0.0 |
 | --- | --- |
 | **Status** | Draft |
 
