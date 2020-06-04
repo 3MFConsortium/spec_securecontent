@@ -66,11 +66,11 @@ See [the 3MF Core Specification software conformance](https://github.com/3MFCons
 
 # Chapter 1. Introduction
 
-This document describes a new Open Packaging Conventions (OPC) root part for securely protecting resources within a 3MF package. If not explicitly stated otherwise, each of these resources is OPTIONAL for producers, but MUST be supported by consumers that specify support for the 3MF Secure Content Extension.
+This document describes a new Open Packaging Conventions (OPC) root part for securely encrypting resources within a 3MF package. If not explicitly stated otherwise, each of these resources is OPTIONAL for producers, but MUST be supported by consumers that specify support for the 3MF Secure Content Extension.
 
 This extension describes the encryption mechanism to protect the 3MF content files (OPC parts), and it should be used in coordination with other 3MF extensions that refer to content stored in different OPC parts: models, textures, etc.
 
-In order to allow for the use of 3MF in highly secure printing environments, several additions are needed to efficiently support confidentiality of specific content in the 3MF package, providing a 3MF producer with the capability to control which consumers have access to the confidential content.
+In order to allow for the use of 3MF in secure printing environments, several additions are needed to efficiently support confidentiality of specific content in the 3MF package, providing a 3MF producer with the capability to control which consumers have access to the confidential content.
 
 While the 3MF Secure Content Extension provides a mechanism for controlling which consumers may have access rights to specific confidential content, it also might be used in conjuction with external Digital Rights Management solution which might provide the access rights to the confidential content.
 
