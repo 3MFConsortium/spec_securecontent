@@ -96,6 +96,8 @@ The encryption model used is a 'two-level' Key Encryption Key - Content Encrypti
 
 -	There could be several consumers for the same 3MF file and at the same time some consumers might have more than a pair of public and private keys, e.g. for different job types. To provide simultaneous access to all authorized parties, the CEK for a confidential resource may be encrypted several times, one for each different potential consumer.
 
+ - A trusted public key exchange is outside of this specification and needs to be handled by the specific ecosystem.
+ 
 - Alternative wrapping schemes might also be supported by a consumer, for example using a symmetric KEK which might be delived to the consumer(s) by any extenal mechanism to the 3MF file.
 
 The KEK-CEK wrapping scheme provides efficiency because the (probably large) data in a confidential resource is encrypted/decrypted only once using an efficient symmetric encryption algorithm and KEK approach provides flexibility in controlling who can access the confidential data, by allowing encrypting the CEK with different KEKs.
