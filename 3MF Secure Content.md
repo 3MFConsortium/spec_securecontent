@@ -72,10 +72,10 @@ This extension describes the encryption mechanism to protect the 3MF content fil
 
 In order to allow for the use of 3MF in secure printing environments, several additions are needed to efficiently support confidentiality of specific content in the 3MF package, providing a 3MF producer with the capability to control which consumers have access to the confidential content.
 
-The underlying mechanism is focusing on a granular and efficient transport layer encryption. The essential key management issues that come with real world applications are left to larger ecosystems. Some use cases include:
+The underlying mechanism is focusing on a granular and efficient sensitive content encryption. The essential key management issues that come with real world applications are left to larger ecosystems. Some use cases include:
 - Ensuring end-to-end encryption from producer to device for privacy sensitive information (like medical patient data)
 - Obeying Governmental regulations for production data (like ITAR or GDPR)
-- Digital Asset Security applications in Industry 4.0
+- Digital Asset Security applications in Industry 4.0 environments
 - Secure Archiving of Print Data in untrusted environments (like Cloud Storage) without the risk of content leakage.
 
 A consumer not supporting the 3MF Secure Content Extension MAY be able to consume the 3MF with this extension, but it may miss any encrypted OPC part.
