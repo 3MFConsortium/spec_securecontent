@@ -4,9 +4,9 @@
 ## Specification & Reference Guide
 
 
-| **Version** | 1.0.1 |
+| **Version** | 1.0.2 |
 | --- | --- |
-| **Status** | Draft |
+| **Status** | Published |
 
 ## Table of Contents
 
