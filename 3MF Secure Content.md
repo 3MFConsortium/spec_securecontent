@@ -82,7 +82,7 @@ A consumer not supporting the 3MF Secure Content Extension MAY be able to consum
 
 In order to avoid data loss while parsing, a 3MF package which uses referenced objects SHOULD enlist the Secure Content Extension as “required extension”, as defined in the core specification. However, if the Secure Content Extension is not enlisted as required, any consumer which does not support the Secure Content Extension will be able to access the unencrypted OPC parts.
 
-A producer MAY add a MustPreserve relashionship to the Key Store OPC part or any encrypted OPC part to indicate to consumers that do not support the 3MF Secure Content extension that SHOULD save those OPC parts when modifying the 3MF file.
+A producer MAY add a MustPreserve relationship to the Key Store OPC part or any encrypted OPC part to indicate to consumers that do not support the 3MF Secure Content extension that SHOULD save those OPC parts when modifying the 3MF file.
 
 ## 1.1 Encryption scheme
 
