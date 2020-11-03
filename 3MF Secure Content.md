@@ -4,9 +4,9 @@
 ## Specification & Reference Guide
 
 
-| **Version** | 1.0.3 |
+| **Version** | 1.0.2 |
 | --- | --- |
-| **Status** | Draft |
+| **Status** | Published |
 
 ## Table of Contents
 
@@ -142,14 +142,14 @@ Element **\<keystore>**
 
 | Name   | Type   | Use   | Default   | Annotation |
 | --- | --- | --- | --- | --- |
-| UUID | **ST\_UUID** | required |   | A universally unique ID that allows the Key Store to be identified. |
+| uuid | **ST\_UUID** | required |   | A universally unique ID that allows the Key Store to be identified. |
 | @anyAttribute | | | | |
 
 The Key Store part consists of a \<keystore> element that encapsulates encryption key data and references to the encrypted content. 
 
 The \<keystore> element contains a set of \<consumer> elements and \<resourcedata> elements. Each \<consumer> element contains the information to identify a consumer key and each \<resourcedata> references the encrypted content and includes the information to be able to decrypt it, such as the encryption algorithm used and the content encryption key, encrypted with the key encryption key of each consumer.
 
-**UUID** - The Key Store universal unique ID that allows the Key Store to be identified over time and across physical and across applications and printers.
+**uuid** - The Key Store universal unique ID that allows the Key Store to be identified over time and across physical and across applications and printers.
 
 When an editor modifies the Key Store, it MUST produce a new uuid to univocally identify the new \<keystore> element content.
 
@@ -163,7 +163,7 @@ Element **\<consumer>**
 
 | Name   | Type   | Use   | Default   | Annotation |
 | --- | --- | --- | --- | --- |
-| consumerid | **string** | required |   | ID of the target consumer. |
+| consumerid | **string** | |   | ID of the target consumer. |
 | keyid | **string** | |   | Optional key identifier. |
 | @anyAttribute | | | | |
 
@@ -317,12 +317,12 @@ Element **\<accessright>**
 
 | Name   | Type   | Use   | Default   | Annotation |
 | --- | --- | --- | --- | --- |
-| consumerindex | **ST\_ResourceIndex** | required | | Zero-based index to the \<consumer> element containing the keys to unwrap the Content Encryption Keys |
+| consumerindex | **ST\_ResourceIndex** | required | | Zero-based index to the \<customer> element containing the keys to unwrap the Content Encryption Keys |
 | @anyAttribute | | | | |
 
 The \<accessright> element under a \<resourcedata> element contains the consumer specific information to unwrap the Content Encryption Keys for a specific consumer. Each \<accessright> element contains the Content Encryption Key (CEK) wrapped with the Key Encryption Key (KEK). 
 
-**consumerindex** - Index to the \<consumer> element in the Key Store to select the Consumer to which the wrapping key is targeted.
+**consumerindex** - Index to the \<consumer> element in the Key Store to select the Customer to which the wrapping key is targeted.
 
 ### 2.2.2.1 KEK Params
 
@@ -393,11 +393,11 @@ Element **\<cipherdata>**
 
 The \<cipherdata> element under the \<accessright> element contains the CEK to decrypt the content file, which is wrapped for a specific consumer using the KEK, granting its access rights.
 
-##### Figure 2–2. xenc:CipherDataType schema diagram
+##### Figure 2–2. xenc:CipherData schema diagram
 
 ![Encrypted Key schema design](images/2.2.2.2.xenc-cipherdata.png)
 
-The \<cipherdata> element, defined as \<xenc:CipherDataType>, contains the encrypted key payload for a specific consumer. It follows the syntax defined in http://www.w3.org/TR/xmlenc-core1/#sec-CipherData.
+The \<xenc:CipherData> element contains the encrypted key payload for a specific customer. It follows the syntax defined in http://www.w3.org/TR/xmlenc-core1/#sec-CipherData.
 
 For the purposes of this specification only the \<xenc:CipherValue> element is supported. Consumers may disregard any other element if present.
 
@@ -445,7 +445,7 @@ Producers MAY add encrypted OPC parts to a 3MF package to protect their content 
 
 An Encrypted File relationship in the .rels file that defines the file content relationship indicates that Consumers SHOULD identify the file as containing encrypted content.
 
-OPC parts that are encrypted MUST be associated with the package through a Encrypted File relationship, and each SHOULD have an entry in the Key Store. If a custom OPC part is not referenced by a Encrypted File relationship it is assumed they are not encrypted and MUST NOT be any entry in the Key store associated to the file.
+OPC parts that are encrypted MUST be associated with the package root through a Encrypted File relationship, and each SHOULD have an entry in the Key Store. If a custom OPC part is not referenced by a Encrypted File relationship it is assumed they are not encrypted and MUST NOT be any entry in the Key store associated to the file.
 
 The following example demonstrates how to add an Encrypted File relationship:
 
@@ -453,7 +453,7 @@ The following example demonstrates how to add an Encrypted File relationship:
 <?xml version="1.0" encoding="UTF-8"?>
 <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
 <Relationship Id="rel1" Target="/3D/Objects/gear_1.model" Type="http://schemas.microsoft.com/3dmanufacturing/2013/01/3dmodel"/>
-<Relationship Id="rel2" Target="/3D/Objects/gear_1.model" Type="http://schemas.openxmlformats.org/package/2006/relationships/encryptedfile"/>
+<Relationship Id="rel1" Target="/3D/Objects/gear_1.model" Type="http://schemas.openxmlformats.org/package/2006/relationships/encryptedfile"/>
 </Relationships>
 ```
 
@@ -496,7 +496,7 @@ See [the 3MF Core Specification glossary](https://github.com/3MFConsortium/spec_
       <xs:element name="keyvalue" type="xs:string" minOccurs="0"/>
       <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="2147483647"/>
     </xs:sequence>
-    <xs:attribute name="consumerid" type="xs:string" use="required"/>
+    <xs:attribute name="consumerid" type="xs:string"/>
     <xs:attribute name="keyid" type="xs:string"/>
     <xs:anyAttribute namespace="##other" processContents="lax"/>
   </xs:complexType>
@@ -573,7 +573,7 @@ See [the 3MF Core Specification glossary](https://github.com/3MFConsortium/spec_
   <xs:element name="accessright" type="CT_AccessRight"/>
   <xs:element name="cekparams" type="CT_CEKParams"/>
   <xs:element name="kekparams" type="CT_KEKParams"/>
-  <xs:element name="cipherdata" type="xenc:CipherDataType"/>
+  <xs:element name="cipherdata" type="xenc:CipherData"/>
 </xs:schema>
 ```
 
