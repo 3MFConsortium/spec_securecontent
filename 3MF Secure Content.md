@@ -280,9 +280,6 @@ Element **\<cekparams>**
 | --- | --- | --- | --- | --- |
 | encryptionalgorithm | **anyURI** | required | | Encryption algorithm used to encrypt the resource data. |
 | compression | **ST\_Compression** |  | none | Compression algorithm applied to content before encryption. |
-| iv | **base64Binary** |  |  | Initialization Vector. |
-| tag | **base64Binary** |  |  | Authentication Tag. |
-| aad | **base64Binary** |  |  | Additional Authenticated Data. |
 | @anyAttribute | | | | |
 
 The \<cekparams> element under a \<resourcedata> element contains the CEK specific encryption information for an encrypted resource.
@@ -297,15 +294,17 @@ A consumer supporting the 3MF Secure Content Extension MUST support, at a minimu
 
 A producer MAY specify a compression “deflate” so the content is first compressed and then encrypted. When compression is "deflate", a consumer MUST first decrypt and then decompress the content.
 
-**\<iv>** - The Inicialization Vector \<iv> element is essentially a nonce, i.e, a value that is unique within the specified context, which determines an invocation of the authenticated encryption function on the input data to be protected. 
+The \<cekparams> element constains the following sequence of elements, which are required or optional depending on the encryption algorithm:
 
-**\<tag>** - The Authentication Tag \<tag> element is a cryptographic checksum on data that is designed to reveal both accidental errors and the intentional modification of the data. 
+- **\<iv>** - The Inicialization Vector \<iv> element is essentially a nonce, i.e, a value that is unique within the specified context, which determines an invocation of the authenticated encryption function on the input data to be protected. 
 
-**\<aad>** - The Additional Authenticated Data \<aad> element contains the additional authenticated data for an encrypted resource.
+- **\<tag>** - The Authentication Tag \<tag> element is a cryptographic checksum on data that is designed to reveal both accidental errors and the intentional modification of the data. 
+
+- **\<aad>** - The Additional Authenticated Data \<aad> element contains the additional authenticated data for an encrypted resource.
 
 > For the purposes of this specification, AES-GCM SHOULD be used with a 96-bit Initialization Vector (IV), 128-bit Authentication Tag (T) and it MAY contain an optional Additional Authenticated Data (AAD). The cipher text is stored in the file path defined in the parent \<resourcedata> element with the cypher file format defined in [Appendix D. 3MF Cipher File Format](#appendix-d-3mf-cipher-file-format).
 
-> During decryption the implementation should compare the authentication tag computed during decryption with the specified Authentication Tag and fail if they don't match. For details on the implementation of AES-GCM, see the publication [SP800-38D](https://csrc.nist.gov/publications/detail/sp/800-38d/final).
+> During decryption the implementation MUST compare the authentication tag computed during decryption with the specified Authentication Tag and MUST fail if they don't match. For details on the implementation of AES-GCM, see the publication [SP800-38D](https://csrc.nist.gov/publications/detail/sp/800-38d/final).
 
 >**Note:** For enhanced security, every time a file is encrypted a new Initialization Vector (IV) SHOULD be generated. See [SP800-38D](https://csrc.nist.gov/publications/detail/sp/800-38d/final) Section 8: Uniqueness Requirement on IVs and Keys.
 
