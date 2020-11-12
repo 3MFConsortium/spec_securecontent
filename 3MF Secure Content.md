@@ -292,7 +292,7 @@ A consumer supporting the 3MF Secure Content Extension MUST support, at a minimu
 
 **compression** - Compression algorithm applied before encrypting the content to obtain a significant compression ratio, specially on text files.
 
-A producer MAY specify a compression “deflate” so the content is first compressed and then encrypted. When compression is "deflate", a consumer MUST first decrypt and then decompress the content.
+A producer MAY specify a compression “deflate” [RFC1951](https://tools.ietf.org/html/rfc1951). so the content is first compressed and then encrypted. When compression is "deflate", a consumer MUST first decrypt and then decompress the content.
 
 The \<cekparams> element constains the following sequence of elements, which are required or optional depending on the encryption algorithm:
 
@@ -617,10 +617,13 @@ All the numeric values MUST be stored in Little Endian format.
 Specification for encrypting data and representing the result in XML. https://www.w3.org/TR/xmlenc-core1/.
 
 **[RFC7468]**
-IETF RFC7468 Textual Encodings of PKIX, PKCS, and CMS Structures, section 13: Textual Encoding of Subject Public Key Info. [https://tools.ietf.org/html/rfc7468#section-13](https://tools.ietf.org/html/rfc7468#section-13)
+IETF RFC7468. Textual Encodings of PKIX, PKCS, and CMS Structures, section 13: Textual Encoding of Subject Public Key Info. [https://tools.ietf.org/html/rfc7468#section-13](https://tools.ietf.org/html/rfc7468#section-13)
 
 **[RFC4055]**
 J. Schaad, B. Kaliski, R. Housley. Additional Algorithms and Identifiers for RSA Cryptography for use in the Internet X.509 Public Key Infrastructure Certificate and Certificate Revocation List (CRL) Profile. June 2005. IETF RFC 4055. URL: http://www.ietf.org/rfc/rfc4055.txt
+
+**[RFC1951]**
+IETF RFC1951. DEFLATE Compressed Data Format Specification version 1.3. URL: https://tools.ietf.org/html/rfc1951.
 
 **[SP800-38D]**
 M. Dworkin. NIST Special Publication 800-38D: Recommendation for Block Cipher Modes of Operation: Galois/Counter Mode (GCM) and GMAC. November 2007 URL: http://csrc.nist.gov/publications/nistpubs/800-38D/SP-800-38D.pdf
