@@ -290,9 +290,11 @@ A consumer supporting the 3MF Secure Content Extension MUST support, at a minimu
 
 > AES-GCM [SP800-38D](https://csrc.nist.gov/publications/detail/sp/800-38d/final) is an authenticated encryption mechanism. It is equivalent to doing these two operations in one step - AES encryption followed by HMAC signing.
 
-**compression** - Compression algorithm applied before encrypting the content to obtain a significant compression ratio, specially on text files.
+**compression** - Compression algorithm applied before encrypting the content to obtain a significant compression ratio, especially on text files.
 
 A producer MAY specify a compression “deflate” [RFC1951](https://tools.ietf.org/html/rfc1951). so the content is first compressed and then encrypted. When compression is "deflate", a consumer MUST first decrypt and then decompress the content.
+
+>**Note:** The compressed data to encrypt is the compressed content without any file format specific header or footer.
 
 The \<cekparams> element constains the following sequence of elements, which are required or optional depending on the encryption algorithm:
 
