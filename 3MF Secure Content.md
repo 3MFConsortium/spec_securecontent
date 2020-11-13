@@ -294,7 +294,7 @@ A consumer supporting the 3MF Secure Content Extension MUST support, at a minimu
 
 A producer MAY specify a compression “deflate” [RFC1951](https://tools.ietf.org/html/rfc1951). so the content is first compressed and then encrypted. When compression is "deflate", a consumer MUST first decrypt and then decompress the content.
 
->**Note:** The compressed data to encrypt is the compressed content without any file format specific header or footer.
+>**Note:** The compressed data to encrypt is the compressed content without any compression file format specific header or footer.
 
 The \<cekparams> element constains the following sequence of elements, which are required or optional depending on the encryption algorithm:
 
@@ -375,7 +375,7 @@ An example of an RSA-OAEP element with MGF1 and SHA256 (recommended):
 
 ```xml
 <kekparams
-  wrappingalgorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep"
+  wrappingalgorithm="http://www.w3.org/2009/xmlenc11#rsa-oaep"
   mgfalgorithm="http://www.w3.org/2009/xmlenc11#mgf1sha256"
   digestmethod="http://www.w3.org/2001/04/xmlenc#sha256" />
 ```
@@ -408,7 +408,7 @@ The Key Store in a 3MF document is identified by a new content type and a new re
 
 ## 3.1 Content Types
 
-The Key Store MUST be defined in the OPC ContentTypes part by overriding the default XML definition.
+The Key Store MUST be defined in the OPC ContentTypes part, as defined in [Appendix C.1 Content Types](#c1-content-types).
 
 ```xml
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
