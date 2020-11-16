@@ -88,7 +88,7 @@ A producer MAY add a MustPreserve relationship to the Key Store OPC part or any 
 
 The encryption model used is a 'two-level' Key Encryption Key - Content Encryption Key (KEK-CEK) wrapping scheme:
 
-- Each confidential resource is encrypted using an efficient symmetric Content Encryption Method, with a randomly generated symmetric Content Encryption Key (CEK). There may be several resources in a 3MF package that requires confidentiality, so different CEKs MUST be provided for each one of them. Consumers MUST support, at a minimum, the AES256 GCM (Gaulois Counter Mode).
+- Each confidential resource is encrypted using an efficient symmetric Content Encryption Method, with a randomly generated symmetric Content Encryption Key (CEK). There may be several resources in a 3MF package that requires confidentiality, so a CEKs MUST be provided for each one of them. Consumers MUST support, at a minimum, the AES256 GCM (Gaulois Counter Mode).
 
 - The CEK for each one of the confidential resources may be wrapped with one or several Key Encryption Keys (KEK), using wrapping methods that ensure that only the intended consumers can decrypt and use the CEK. This means that the consumers must have available the decryption key.
 
@@ -388,6 +388,8 @@ Other algorithms, mask generation or disgest methods MAY be supported by a consu
 
 **Note:** For enhanced security, it is recommended to use the SHA256 digest method and the MFG1 with SHA256 mask generation function.
 
+**Note:** When using RSA OAEP for KEK encryption, producers MUST use the same hash function (SHA1, SHA256, etc) for both the digest method and mask function algorithm.
+
 #### 2.2.2.2 Cipher Data
 
 Element **\<cipherdata>**
@@ -446,7 +448,7 @@ Producers MAY add encrypted OPC parts to a 3MF package to protect their content 
 
 An Encrypted File relationship in the .rels file that defines the file content relationship indicates that Consumers SHOULD identify the file as containing encrypted content.
 
-OPC parts that are encrypted MUST be associated with the package through a Encrypted File relationship, and each SHOULD have an entry in the Key Store. If a custom OPC part is not referenced by a Encrypted File relationship it is assumed they are not encrypted and MUST NOT be any entry in the Key store associated to the file.
+OPC parts that are encrypted MUST be associated with the package through an Encrypted File relationship, and each SHOULD have an entry in the Key Store. If a custom OPC part is not referenced by an Encrypted File relationship it is assumed they are not encrypted and MUST NOT be any entry in the Key store associated to the file.
 
 The following example demonstrates how to add an Encrypted File relationship:
 
