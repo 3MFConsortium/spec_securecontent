@@ -384,7 +384,7 @@ An example of an RSA-OAEP element with MGF1 and SHA256 (recommended):
 
 A consumer supporting the 3MF Secure Content Extension MUST support the RSA OAEP with MFG1 with either SHA1 or SHA256 digest methods, as defined in https://www.w3.org/TR/xmlenc-core1/#sec-Alg-MessageDigest.
 
-Other algorithms, mask generation or disgest methods MAY be supported by a consumer as far the producer and the consumer are able to negotiate them outside of the 3MF Secure Content specification.
+Other algorithms, mask generation or digest methods MAY be supported by a consumer as far the producer and the consumer are able to negotiate them outside of the 3MF Secure Content specification.
 
 **Note:** For enhanced security, it is recommended to use the SHA256 digest method and the MFG1 with SHA256 mask generation function.
 
@@ -448,7 +448,7 @@ Producers MAY add encrypted OPC parts to a 3MF package to protect their content 
 
 An Encrypted File relationship in the .rels file that defines the file content relationship indicates that Consumers SHOULD identify the file as containing encrypted content.
 
-OPC parts that are encrypted MUST be associated with the package through an Encrypted File relationship, and each SHOULD have an entry in the Key Store. If a custom OPC part is not referenced by an Encrypted File relationship it is assumed they are not encrypted and MUST NOT be any entry in the Key store associated to the file.
+OPC parts that are encrypted MUST be associated with an Encrypted File relationship, in the .rels file from the referencing model file, and each SHOULD have an entry in the Key Store. If a custom OPC part is not referenced by an Encrypted File relationship it is assumed they are not encrypted and MUST NOT be any entry in the Key store associated to the file.
 
 The following example demonstrates how to add an Encrypted File relationship:
 
