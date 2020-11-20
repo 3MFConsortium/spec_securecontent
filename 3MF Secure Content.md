@@ -117,7 +117,7 @@ When used in conjunction with the 3MF Production extension version 1.2 or above,
 
 Other content files defined in other 3MF extensions might be also encrypted, when identified by their file paths in the \<keystore> element. For example, color textures as defined in the 3MF materials and properties extension, etc.
 
-Only non-root OPC parts MAY be encrypted. Root OPC parts and parts relationships MUST not be encrypted to be compliant with OPC.
+Only non-root OPC parts MAY be encrypted. Root OPC parts and parts relationships MUST NOT be encrypted to be compliant with OPC.
 
 ## 1.3 Package Organization and OPC Compliance
 
@@ -435,8 +435,8 @@ Example root .rels file, where the KeyStore part is referenced twice: one for th
     <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
     <Relationship Type="http://schemas.microsoft.com/3dmanufacturing/2013/01/3dmodel" Target="/3D/build.model" Id="rel0" />
     <Relationship Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/thumbnail" Target="/Metadata/thumbnail.png" Id="rel4" />
-   <Relationship Type="http://schemas.microsoft.com/3dmanufacturing/2019/04/keystore" Target="/Secure/keystore.xml" Id="rel10" />
-   <Relationship Type="http://schemas.openxmlformats.org/package/2006/relationships/mustpreserve" Target="/Secure/keystore.xml" Id="rel11" />
+    <Relationship Type="http://schemas.microsoft.com/3dmanufacturing/2019/04/keystore" Target="/Secure/keystore.xml" Id="rel10" />
+    <Relationship Type="http://schemas.openxmlformats.org/package/2006/relationships/mustpreserve" Target="/Secure/keystore.xml" Id="rel11" />
 </Relationships>
 ```
 
@@ -448,7 +448,7 @@ Producers MAY add encrypted OPC parts to a 3MF package to protect their content 
 
 An Encrypted File relationship in the .rels file that defines the file content relationship indicates that Consumers SHOULD identify the file as containing encrypted content.
 
-OPC parts that are encrypted MUST be associated with an Encrypted File relationship, in the .rels file from the referencing model file, and each SHOULD have an entry in the Key Store. If a custom OPC part is not referenced by an Encrypted File relationship it is assumed they are not encrypted and MUST NOT be any entry in the Key store associated to the file.
+Encrypted OPC parts that are referenced from other OPC parts MUST be associated with an Encrypted File relationship in the .rels file from the referencing part, such as a model part, otherwise they MUST have an entry in the root .rels file. Each SHOULD have an entry in the Key Store. If a custom OPC part is not referenced by any Encrypted File relationship it is assumed they are not encrypted and SHOULD NOT be any entry in the Key store associated with that part.   
 
 The following example demonstrates how to add an Encrypted File relationship:
 
