@@ -470,7 +470,10 @@ See [the 3MF Core Specification glossary](https://github.com/3MFConsortium/spec_
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
-<xs:schema xmlns="http://schemas.microsoft.com/3dmanufacturing/securecontent/2019/04" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xenc="http://www.w3.org/2001/04/xmlenc#" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" targetNamespace="http://schemas.microsoft.com/3dmanufacturing/securecontent/2019/04" elementFormDefault="unqualified" attributeFormDefault="unqualified" blockDefault="#all">
+<xs:schema xmlns="http://schemas.microsoft.com/3dmanufacturing/securecontent/2019/04"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xenc="http://www.w3.org/2001/04/xmlenc#" xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+  targetNamespace="http://schemas.microsoft.com/3dmanufacturing/securecontent/2019/04"
+  elementFormDefault="unqualified" attributeFormDefault="unqualified" blockDefault="#all">
   <xs:import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="http://www.w3.org/2001/xml.xsd"/>
   <xs:import namespace="http://www.w3.org/2001/04/xmlenc#" schemaLocation="https://www.w3.org/TR/xmlenc-core1/xenc-schema.xsd"/>
   <xs:annotation>
