@@ -80,7 +80,7 @@ The underlying mechanism is focusing on a granular and efficient sensitive conte
 
 A consumer not supporting the 3MF Secure Content Extension MAY be able to consume the 3MF with this extension, but it may miss any encrypted OPC part.
 
-In order to avoid data loss while parsing, a 3MF package which uses referenced objects SHOULD enlist the Secure Content Extension as “required extension”, as defined in the core specification. However, if the Secure Content Extension is not enlisted as required, any consumer which does not support the Secure Content Extension will be able to access the unencrypted OPC parts.
+To avoid data loss while parsing, a 3MF package which uses referenced objects SHOULD enlist the Secure Content Extension as “required extension”, as defined in the core specification. However, if the Secure Content Extension is not enlisted as required, any consumer which does not support the Secure Content Extension will be able to access the unencrypted OPC parts.
 
 A producer MAY add a MustPreserve relationship to the Key Store OPC part or any encrypted OPC part to indicate to consumers that do not support the 3MF Secure Content extension that SHOULD save those OPC parts when modifying the 3MF file.
 
@@ -117,7 +117,7 @@ When used in conjunction with the 3MF Production extension version 1.2 or above,
 
 Other content files defined in other 3MF extensions might be also encrypted, when identified by their file paths in the \<keystore> element. For example, color textures as defined in the 3MF materials and properties extension, etc.
 
-Non-root OPC parts and Custom Parts MAY be encrypted. Root OPC parts and parts relationships, with the exception of Custom Parts,  MUST NOT be encrypted to be compliant with OPC.
+Non-root OPC parts and Custom Parts MAY be encrypted. Root OPC parts and parts relationships, except for Custom Parts, MUST NOT be encrypted to be compliant with OPC.
 
 ## 1.3 Package Organization and OPC Compliance
 
@@ -298,7 +298,7 @@ A producer MAY specify a compression “deflate” [RFC1951](https://tools.ietf.
 
 The \<cekparams> element constains the following sequence of elements, which are required or optional depending on the encryption algorithm:
 
-- **\<iv>** - The Inicialization Vector \<iv> element is essentially a nonce, i.e, a value that is unique within the specified context, which determines an invocation of the authenticated encryption function on the input data to be protected. 
+- **\<iv>** - The Initialization Vector \<iv> element is essentially a nonce, i.e, a value that is unique within the specified context, which determines an invocation of the authenticated encryption function on the input data to be protected. 
 
 - **\<tag>** - The Authentication Tag \<tag> element is a cryptographic checksum on data that is designed to reveal both accidental errors and the intentional modification of the data. 
 
