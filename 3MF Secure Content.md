@@ -611,7 +611,7 @@ The following take defines the 3MF Cipher File format.
 | 5 | 0x00 | Version major |
 | 6 | 0x00 | Version minor |
 | 7 | 0x00 | Unused. Must be 0x00 |
-| 8 - 11 | | Header length since octet 0. Minimum value 12. |
+| 8 - 11 | | Header length since octet 0. Minimum value 12. Maximum value 2^31. |
 | 12 - (Header length - 1) | | Reserved Header Data. |
 | (Header length) - EOF | | Crypto content |
 
