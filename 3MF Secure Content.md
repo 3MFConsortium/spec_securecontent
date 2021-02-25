@@ -117,7 +117,7 @@ When used in conjunction with the 3MF Production extension version 1.2 or above,
 
 Other content files defined in other 3MF extensions might be also encrypted, when identified by their file paths in the \<keystore> element. For example, color textures as defined in the 3MF materials and properties extension, etc.
 
-Non-root OPC parts and Custom Parts MAY be encrypted. Root OPC parts and parts relationships, except for Custom Parts, MUST NOT be encrypted to be compliant with OPC.
+Non-root OPC parts and Custom Parts MAY be encrypted. Root OPC root relationships as defined in to [the 3MF Core Specification Package Organization and OPC Compliance](https://github.com/3MFConsortium/spec_core/blob/master/3MF%20Core%20Specification.md#211-3d-parts-and-payload-relationships) and non-root parts relationships MUST NOT be encrypted to be compliant with OPC.
 
 ## 1.3 Package Organization and OPC Compliance
 
