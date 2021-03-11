@@ -125,7 +125,7 @@ A new 3MF resource, the Key Store, is defined to support content encryption. The
 
 For each confidential resource, the Key Store may contain:
 
-- Information on how the content is encrypted: the wrapping method, and other information relevant to enable content decryption.
+- Information on how the content is encrypted, the wrapping method, and other information relevant to enable content decryption.
 
 - One CEK wrapped using a KEK, with the corresponding information about the wrapping method used, for each one of the consumers authorized to decrypt confidential content.
 
@@ -177,7 +177,7 @@ On symmetric wrapping schemes, the target consumer might not be defined in the 3
 
 **keyid** - The optional alphanumeric key identifier attribute for identifying the consumer's Key Encryption Key (KEK), which it is used for wrapping the content encryption keys targeted to this consumer.
 
-It is possible that a consumer has different encryption keys. In this case, additional information about the specific key pair used as Key Encryption Key is needed. This information MAY be provided by specifying the key identification.
+It is possible that a consumer has different wrapping keys. In this case, additional information about the specific key pair used as Key Encryption Key is needed. This information MAY be provided by specifying the key identification.
 
 See the following example:
 
