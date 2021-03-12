@@ -33,34 +33,20 @@ name: Build
 jobs:
   build-linux:
     runs-on: ubuntu-18.04
-    env: # Or as an environment variable
-      superSecret: ${{ secrets.ORG_SECRET }}
+    env:
       SPECNAME: "3MF Secure Content"
     steps:
-    - run: echo $SPECNAME
-    - run: echo $superSecret
-    
-  build-linux2:
-    runs-on: ubuntu-18.04
-    steps:
-    - shell: bash
-      env:
-        SUPER_SECRET: ${{ secrets.ORG_SECRET }}
-      run: |
-        echo "$SUPER_SECRET"
-
-#    steps:
-#      - uses: actions/checkout@v2
-#        with:
-#          submodules: true
-#      - run: pip install grip
-#      - run: ./markdownToPDF/install_wkhtmltopdf.sh
-#      - run: ./markdownToPDF/mdToPDF.sh "$SPECNAME"
-#      - name: Upload PDF
-#        uses: actions/upload-artifact@v2
-#        with:
-#          name: file
-#          path: file
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+      - run: pip install grip
+      - run: ./markdownToPDF/install_wkhtmltopdf.sh
+      - run: ./markdownToPDF/mdToPDF.sh "$SPECNAME"
+      - name: Upload PDF
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${SPECNAME}.pdf
+          path: ${SPECNAME}.pdf
         
         
         
