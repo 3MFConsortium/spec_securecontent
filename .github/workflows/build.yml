@@ -43,11 +43,12 @@ jobs:
       - run: pip install grip
       - run: ./markdownToPDF/install_wkhtmltopdf.sh
       - run: ./markdownToPDF/mdToPDF.sh "$SPECNAME"
+      - run: ls
       - name: Upload PDF
         uses: actions/upload-artifact@v2
         with:
-          name: ${SPECNAME}.pdf
-          path: ${SPECNAME}.pdf
+          name: "$SPECNAME".pdf
+          path: "$SPECNAME".pdf
         
         
         
