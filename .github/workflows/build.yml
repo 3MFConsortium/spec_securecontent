@@ -32,14 +32,19 @@ on: [push, pull_request]
 name: Build
 jobs:
   build-linux:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     env:
       SPECNAME: "3MF Secure Content"
     steps:
       - uses: actions/checkout@v2
         with:
           submodules: true
+      - run: python --version
+      - run: pip --version
+      - run: pip install wheel
       - run: pip install grip
+      - run: python3 --version
+      - run: pip3 --version
       - run: ./markdownToPDF/install_wkhtmltopdf.sh
       - run: ./markdownToPDF/mdToPDF.sh "$SPECNAME"
       - name: Upload PDF
