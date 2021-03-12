@@ -33,10 +33,9 @@ name: Build
 jobs:
   build-linux:
     runs-on: ubuntu-18.04
-    env:
-      SPECNAME: "3MF Secure Content"
     env: # Or as an environment variable
       superSecret: ${{ secrets.ORG_SECRET }}
+      SPECNAME: "3MF Secure Content"
     steps:
     - run: echo $SPECNAME
     - run: echo $superSecret
