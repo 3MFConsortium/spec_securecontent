@@ -6,7 +6,7 @@
 
 | **Version** | 1.0.3 |
 | --- | --- |
-| **Status** | Draft |
+| **Status** | Published |
 
 ## Table of Contents
 
