@@ -47,8 +47,8 @@ jobs:
       - name: Upload PDF
         uses: actions/upload-artifact@v2
         with:
-          name: "$SPECNAME".pdf
-          path: "$SPECNAME".pdf
+          name: $SPECNAME.pdf
+          path: $SPECNAME.pdf
         
         
         
