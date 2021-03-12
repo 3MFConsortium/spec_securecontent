@@ -52,8 +52,8 @@ jobs:
       - name: Upload PDF
         uses: actions/upload-artifact@v2
         with:
-          name: "$SPECNAME".pdf
-          path: "$SPECNAME".pdf
+          name: ${{ env.SPECNAME }}.2.pdf
+          path: ${{ env.SPECNAME }}.pdf
         
         
         
