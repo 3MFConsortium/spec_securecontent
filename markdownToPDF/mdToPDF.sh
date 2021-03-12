@@ -23,7 +23,7 @@
 
 #!/bin/bash
 
-mkdir ~/.grip
+# mkdir ~/.grip
 # echo "PASSWORD = '${GITHUB_API_KEY}'" > ~/.grip/settings.py
 
 FILE="$1"

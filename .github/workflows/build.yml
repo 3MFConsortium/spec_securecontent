@@ -25,10 +25,10 @@
 # It is used to create am easily distributable and printable PDF
 # version of a specification document written in markdown (3MF-style).
 
-# Documentation:
+# (outdated) Documentation:
 #   https://github.com/3MFConsortium/spec_conventions/blob/master/generatePDFs/generatePDFs.md
 
-on: [push, pull_request]
+on: [pull_request]
 name: Build
 jobs:
   build-linux:
@@ -43,16 +43,10 @@ jobs:
       - run: pip install grip
       - run: ./markdownToPDF/install_wkhtmltopdf.sh
       - run: ./markdownToPDF/mdToPDF.sh "$SPECNAME"
-      - run: ls
       - name: Upload PDF
         uses: actions/upload-artifact@v2
         with:
-          name: 3MF Secure Content.pdf
-          path: 3MF Secure Content.pdf
-      - name: Upload PDF
-        uses: actions/upload-artifact@v2
-        with:
-          name: ${{ env.SPECNAME }}.2.pdf
+          name: ${{ env.SPECNAME }}.pdf
           path: ${{ env.SPECNAME }}.pdf
         
         
