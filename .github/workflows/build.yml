@@ -47,8 +47,13 @@ jobs:
       - name: Upload PDF
         uses: actions/upload-artifact@v2
         with:
-          name: $SPECNAME.pdf
-          path: $SPECNAME.pdf
+          name: 3MF Secure Content.pdf
+          path: 3MF Secure Content.pdf
+      - name: Upload PDF
+        uses: actions/upload-artifact@v2
+        with:
+          name: "$SPECNAME".pdf
+          path: "$SPECNAME".pdf
         
         
         
